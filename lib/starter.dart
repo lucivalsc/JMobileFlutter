@@ -2,9 +2,11 @@ import 'package:jmobileflutter/app/layers/presenter/logged_in/menu_principal_pag
 import 'package:jmobileflutter/app/layers/presenter/not_logged_in/login_screen.dart';
 import 'package:jmobileflutter/app/layers/presenter/not_logged_in/splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:jmobileflutter/app/layers/presenter/providers/config_provider.dart';
+import 'package:provider/provider.dart';
 
 class Starter extends StatefulWidget {
-  const Starter({Key? key}) : super(key: key);
+  const Starter({super.key});
 
   static const route = "starter_screen";
 
@@ -15,10 +17,14 @@ class Starter extends StatefulWidget {
 class _StarterState extends State<Starter> {
   late Future<void> future;
   late Widget nextScreen;
+  late ConfigProvider configProvider;
 
   Future<void> startApp() async {
-    
-    if (false == true) {
+    configProvider = Provider.of<ConfigProvider>(context, listen: false);
+    var userLogger = await configProvider.loadLastLoggedEmail();
+    var passwordLogger = await configProvider.loadLastLoggedPassword();
+
+    if (userLogger.isNotEmpty && passwordLogger.isNotEmpty) {
       nextScreen = const MenuPrincipalPagina(); //MainMenuScreen
     } else {
       nextScreen = const LoginScreen();

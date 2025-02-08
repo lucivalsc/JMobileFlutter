@@ -86,6 +86,7 @@ class _SincronizarScreenState extends State<SincronizarScreen> {
                     : () async {
                         setState(() => isSyncing = true);
                         await dataProvider.synchronous(context);
+                        await dataProvider.synchronous(context, key: 'contas');
                         if (mounted) {
                           setState(() => isSyncing = false);
                           await push(
@@ -94,12 +95,6 @@ class _SincronizarScreenState extends State<SincronizarScreen> {
                               description: 'Sincronizado com sucesso!',
                             ),
                           );
-                          // ScaffoldMessenger.of(context).showSnackBar(
-                          //   const SnackBar(
-                          //     content: Text("Sincronização concluída com sucesso!"),
-                          //     backgroundColor: Colors.green,
-                          //   ),
-                          // );
                         }
                       },
               ),

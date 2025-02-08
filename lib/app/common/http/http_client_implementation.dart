@@ -27,7 +27,7 @@ class HttpClientImplementation implements IHttpClient {
     try {
       response =
           await client.get(Uri.parse(url.replaceAll(':NULL', '').replaceAll(':null', '')), headers: headers).timeout(
-                const Duration(seconds: 30),
+                const Duration(seconds: 10),
               );
       return HttpResponse(
         statusCode: response.statusCode,
@@ -67,7 +67,7 @@ class HttpClientImplementation implements IHttpClient {
             headers: headers,
             body: payload != null ? json.encode(payload) : null,
           )
-          .timeout(const Duration(seconds: 30));
+          .timeout(const Duration(seconds: 10));
       return HttpResponse(
         statusCode: response.statusCode,
         data: response.body.isNotEmpty
@@ -106,7 +106,7 @@ class HttpClientImplementation implements IHttpClient {
             headers: headers,
             body: payload != null ? json.encode(payload) : null,
           )
-          .timeout(const Duration(seconds: 30));
+          .timeout(const Duration(seconds: 10));
       return HttpResponse(
         statusCode: response.statusCode,
         data: null,
@@ -144,7 +144,7 @@ class HttpClientImplementation implements IHttpClient {
             headers: headers,
             body: payload != null ? json.encode(payload) : null,
           )
-          .timeout(const Duration(seconds: 30));
+          .timeout(const Duration(seconds: 10));
       return HttpResponse(
         statusCode: response.statusCode,
         data: response.bodyBytes,
@@ -181,7 +181,7 @@ class HttpClientImplementation implements IHttpClient {
             headers: headers,
             body: payload != null ? json.encode(payload) : null,
           )
-          .timeout(const Duration(seconds: 30));
+          .timeout(const Duration(seconds: 10));
       return HttpResponse(
         statusCode: response.statusCode,
         data: json.decode(response.body),
@@ -214,7 +214,7 @@ class HttpClientImplementation implements IHttpClient {
     try {
       response = await client
           .delete(Uri.parse(url.replaceAll(':NULL', '').replaceAll(':null', '')), headers: headers)
-          .timeout(const Duration(seconds: 30));
+          .timeout(const Duration(seconds: 10));
       return HttpResponse(
           statusCode: response.statusCode,
           data: response.body.isNotEmpty

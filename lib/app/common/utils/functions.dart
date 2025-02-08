@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
@@ -43,27 +43,21 @@ String formatter(DateTime? date) {
   }
 }
 
-String formatDatetime(String? date) => date != null
-    ? DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.parse(date).toLocal())
-    : '--';
+String formatDatetime(String? date) =>
+    date != null ? DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.parse(date).toLocal()) : '--';
 
 String formatDate(String? date, {bool? showTime = false}) {
   return date != null
-      ? DateFormat('dd/MM/yyyy ${showTime == true ? 'HH:mm:ss' : ''}')
-          .format(DateTime.parse(date).toLocal())
+      ? DateFormat('dd/MM/yyyy ${showTime == true ? 'HH:mm:ss' : ''}').format(DateTime.parse(date).toLocal())
       : '-';
 }
 
 String formatTime(String? date, {bool? showTime = false}) {
-  return date != null
-      ? DateFormat('HH:mm:ss').format(DateTime.parse(date).toLocal())
-      : '-';
+  return date != null ? DateFormat('HH:mm:ss').format(DateTime.parse(date).toLocal()) : '-';
 }
 
 String formatDateTimeDivider(String? date) {
-  return date != null
-      ? DateFormat('dd/MM/yyyy - HH:mm:ss').format(DateTime.parse(date))
-      : '-';
+  return date != null ? DateFormat('dd/MM/yyyy - HH:mm:ss').format(DateTime.parse(date)) : '-';
 }
 
 DateTime formatarData(String data) {
@@ -111,8 +105,7 @@ String capitalize(String string) {
 }
 
 Future<void> startHiveStuff() async {
-  await getApplicationDocumentsDirectory()
-      .then((directory) => Hive.init(directory.path));
+  await getApplicationDocumentsDirectory().then((directory) => Hive.init(directory.path));
 }
 
 Widget base64ToImage(String base64Image) {
@@ -160,8 +153,7 @@ Widget base64ToImage(String base64Image) {
 // }
 
 Map<dynamic, dynamic> reorganizeData(Map<String, dynamic> jsonData, key) {
-  List<Map<String, dynamic>> dataList =
-      List<Map<String, dynamic>>.from(jsonData['data']);
+  List<Map<String, dynamic>> dataList = List<Map<String, dynamic>>.from(jsonData['data']);
   if (key == 'total') {
     dataList.sort((a, b) => a[key].compareTo(b[key]));
   }
@@ -296,4 +288,24 @@ Color getColorFromList(int index, List<Color> colorList) {
 
   final int colorIndex = index % colorList.length;
   return colorList[colorIndex];
+}
+
+// Função para buscar o endereço pelo CEP usando a API ViaCEP
+Future<Map<String, dynamic>> buscarEnderecoPorCep(String cep) async {
+  final url = 'https://viacep.com.br/ws/$cep/json/';
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    // Decodifica o JSON retornado pela API
+    Map<String, dynamic> data = json.decode(response.body);
+
+    // Verifica se a API retornou um erro (ex.: CEP inválido)
+    if (data.containsKey('erro')) {
+      throw Exception('CEP não encontrado.');
+    }
+
+    return data;
+  } else {
+    throw Exception('Erro ao consultar o CEP. Status code: ${response.statusCode}');
+  }
 }

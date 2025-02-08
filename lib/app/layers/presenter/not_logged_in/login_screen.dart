@@ -83,6 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: 'Senha',
                     icon: Icons.lock,
                     controller: passwordLogger,
+                    obscureText: true,
                   ),
                   const SizedBox(height: 10),
                   ElevatedButtonWidget(
@@ -127,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextButton(
                     child: Text(
                       'CONFIGURAÇÃO',
-                      style: appStyles.configSectionTitleStyle,
+                      style: appStyles.configCardTitleStyle,
                     ),
                     onPressed: () {
                       push(context, ConfiguracaoScreen());

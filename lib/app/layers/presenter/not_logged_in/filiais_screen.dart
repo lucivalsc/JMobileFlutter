@@ -59,12 +59,12 @@ class FiliaisScreen extends StatelessWidget {
                     onTap: () {
                       // Ação ao selecionar a filial
                       Navigator.of(context).pop();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => MenuPrincipalPagina(itemFilial: filial),
-                        ),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (_) => MenuPrincipalPagina(itemFilial: filial),
+                      //   ),
+                      // );
                       // showDialog(
                       //   context: context,
                       //   builder: (context) => AlertDialog(

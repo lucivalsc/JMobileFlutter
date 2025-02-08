@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:jmobileflutter/app/common/styles/app_styles.dart';
 import 'package:jmobileflutter/app/common/widgets/app_widgets.dart';
 import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/clientes/clientes_lista_screen.dart';
+import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/pedidos/pedidos_fechar_screen.dart';
 import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/produtos/produtos_lista_screen.dart';
 import 'package:jmobileflutter/navigation.dart';
 
-class PedidosScreen extends StatefulWidget {
-  const PedidosScreen({super.key});
+class PedidosNovoScreen extends StatefulWidget {
+  const PedidosNovoScreen({super.key});
 
   @override
-  State<PedidosScreen> createState() => _PedidosScreenState();
+  State<PedidosNovoScreen> createState() => _PedidosNovoScreenState();
 }
 
-class _PedidosScreenState extends State<PedidosScreen> {
+class _PedidosNovoScreenState extends State<PedidosNovoScreen> {
   AppWidgets appWidgets = AppWidgets();
   AppStyles appStyles = AppStyles();
   Map cliente = {'NOMECLI': '', 'CPF': '', 'TELEFONE': ''};
@@ -128,7 +129,9 @@ class _PedidosScreenState extends State<PedidosScreen> {
                               }
                             },
                           ),
+                          const SizedBox(width: 10),
                           Text("$quantidade"),
+                          const SizedBox(width: 10),
                           IconButton(
                             icon: const Icon(Icons.add),
                             onPressed: () {
@@ -197,6 +200,7 @@ class _PedidosScreenState extends State<PedidosScreen> {
                       });
                       Navigator.pop(context);
                     },
+                    style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
                     child: const Text("Salvar Alterações"),
                   ),
                 ],
@@ -245,7 +249,7 @@ class _PedidosScreenState extends State<PedidosScreen> {
         appBar: AppBar(
           title: const Text('Novo Pedido'),
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(45),
+            preferredSize: const Size.fromHeight(60),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: InkWell(
@@ -259,36 +263,38 @@ class _PedidosScreenState extends State<PedidosScreen> {
                 },
                 child: Row(
                   children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Razão Social: ${cliente['NOMECLI']}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Razão Social: ${cliente['NOMECLI']}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            Text(
-                              'CPF: ${cliente['CPF']}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.white,
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Text(
+                                'CPF: ${cliente['CPF']}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    const Icon(Icons.search),
+                    const Icon(Icons.search, color: Colors.white),
                   ],
                 ),
               ),
@@ -307,8 +313,20 @@ class _PedidosScreenState extends State<PedidosScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Text('Valor Total: R\$ ${getValorTotal().toStringAsFixed(2)}'),
-                      Text('Qtde Itens: ${getQuantidadeTotal()}'),
+                      Text(
+                        'Valor Total: R\$ ${getValorTotal().toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Qtde Itens: ${getQuantidadeTotal()}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -376,48 +394,43 @@ class _PedidosScreenState extends State<PedidosScreen> {
           ],
         ),
         floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: [
-            FloatingActionButton(
-              heroTag: 'obs',
-              onPressed: () {},
-              child: const Icon(Icons.note_add),
+            FloatingActionButton.extended(
+              heroTag: "btnProduto",
+              label: const Text("Adicionar Produto"),
+              onPressed: cliente['NOMECLI'].isEmpty && listaProdutos.isEmpty
+                  ? null
+                  : () async {
+                      var retorno = await push(context, ProdutosListaScreen(isFromPedido: true));
+                      if (retorno == null) return;
+                      adicionarOuAtualizarProduto(retorno);
+                    },
             ),
             const SizedBox(height: 15),
-            FloatingActionButton(
-              heroTag: 'produto',
-              onPressed: () async {
-                var retorno = await push(context, ProdutosListaScreen(isFromPedido: true));
-                if (retorno == null) return;
-                adicionarOuAtualizarProduto(retorno);
-              },
-              child: const Icon(Icons.add_shopping_cart),
+            FloatingActionButton.extended(
+              heroTag: "btnSalvar",
+              label: const Text("Fechar Pedido"),
+              onPressed: cliente['NOMECLI'].isEmpty && listaProdutos.isEmpty
+                  ? null
+                  : () {
+                      if (cliente['NOMECLI'].isEmpty || listaProdutos.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Selecione um cliente e adicione produtos antes de salvar."),
+                          ),
+                        );
+                        return;
+                      }
+                      // Lógica para salvar o pedido
+                      push(context, PedidosFecharScreen(cliente: cliente, listaProdutos: listaProdutos));
+                    },
+              backgroundColor:
+                  cliente['NOMECLI'].isEmpty && listaProdutos.isEmpty ? Colors.grey : appStyles.primaryColor,
             ),
-            const SizedBox(height: 55),
           ],
-        ),
-        bottomSheet: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: appWidgets.buildPrimaryButton(
-            () {
-              if (cliente['NOMECLI'].isEmpty || listaProdutos.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Selecione um cliente e adicione produtos antes de salvar."),
-                  ),
-                );
-                return;
-              }
-              // Lógica para salvar o pedido
-              print("Pedido salvo:");
-              print("Cliente: $cliente");
-              print("Produtos: $listaProdutos");
-            },
-            label: 'FECHAR PEDIDO',
-            enable: cliente['NOMECLI'].isNotEmpty && listaProdutos.isNotEmpty,
-            processing: false,
-            buttonColor: appStyles.primaryColor,
-          ),
         ),
       ),
     );

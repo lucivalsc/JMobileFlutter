@@ -3,9 +3,10 @@ import 'package:jmobileflutter/app/common/styles/app_styles.dart';
 import 'package:jmobileflutter/app/common/widgets/app_widgets.dart';
 import 'package:jmobileflutter/app/layers/data/datasources/local/banco_datasource_implementation.dart';
 import 'package:jmobileflutter/app/layers/data/models/debouncer_model.dart';
+import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/produtos/produtos_visualizar_screen.dart';
 
 class ProdutosListaScreen extends StatefulWidget {
-  final bool isFromPedido;
+  final bool? isFromPedido;
   const ProdutosListaScreen({super.key, this.isFromPedido = false});
   static const String route = "produtos_lista_screen";
   @override
@@ -96,7 +97,9 @@ class ProdutosListaScreenState extends State<ProdutosListaScreen> {
                               }
                             },
                           ),
+                          const SizedBox(width: 10),
                           Text("$quantidade"),
+                          const SizedBox(width: 10),
                           IconButton(
                             icon: const Icon(Icons.add),
                             onPressed: () {
@@ -170,6 +173,7 @@ class ProdutosListaScreenState extends State<ProdutosListaScreen> {
                         },
                       );
                     },
+                    style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
                     child: const Text("Adicionar"),
                   ),
                 ],
@@ -233,10 +237,50 @@ class ProdutosListaScreenState extends State<ProdutosListaScreen> {
               return Card(
                 child: ListTile(
                   onTap: () {
-                    if (widget.isFromPedido) {
+                    if (widget.isFromPedido!) {
                       _openProductDetails(context, item as Map<String, dynamic>);
                     } else {
-                      Navigator.pop(context, item as Map);
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('Escolha a ação para: ${item['NOMEPROD']}!'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [],
+                            ),
+                            actions: [
+                              TextButton(
+                                child: Text(
+                                  'Cancelar',
+                                  style: TextStyle(
+                                    color: appStyles.primaryColor,
+                                  ),
+                                ),
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                              TextButton(
+                                child: Text(
+                                  'Visualizar',
+                                  style: TextStyle(
+                                    color: appStyles.primaryColor,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ProdutosVisualizarScreen(produto: item),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
                     }
                   },
                   title: Text(

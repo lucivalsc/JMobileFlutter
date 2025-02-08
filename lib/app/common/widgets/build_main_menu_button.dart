@@ -30,19 +30,27 @@ class BuildMainMenuButton extends StatelessWidget {
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
-          side: BorderSide(color: AppStyles().primaryColor, width: 1.5),
+          side: BorderSide(color: Colors.grey, width: 1),
         ),
-        elevation: 2,
+        elevation: 1,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: MediaQuery.of(context).size.width / 8.5,
-              color: AppStyles().primaryColor, // substitua por appStyles.blackColor, se desejar
+            Container(
+              height: MediaQuery.of(context).size.width / 6.5,
+              width: MediaQuery.of(context).size.width / 6.5,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppStyles().secondaryColor2,
+              ),
+              child: Icon(
+                icon,
+                size: MediaQuery.of(context).size.width / 8.5,
+                color: AppStyles().primaryColor, // substitua por appStyles.blackColor, se desejar
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             AutoSizeText(
               title,
               textAlign: TextAlign.center,

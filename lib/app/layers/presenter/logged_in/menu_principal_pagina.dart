@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:jmobileflutter/app/common/styles/app_styles.dart';
 import 'package:jmobileflutter/app/common/widgets/app_widgets.dart';
-import 'package:jmobileflutter/app/common/widgets/elevated_button_widget.dart';
+import 'package:jmobileflutter/app/layers/data/datasources/local/banco_datasource_implementation.dart';
 import 'package:jmobileflutter/app/layers/presenter/logged_in/main_menu_list.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/produtos/produtos_lista_screen.dart';
 import 'package:jmobileflutter/app/layers/presenter/not_logged_in/login_screen.dart';
 import 'package:jmobileflutter/app/layers/presenter/providers/auth_provider.dart';
 import 'package:jmobileflutter/app/layers/presenter/providers/config_provider.dart';
@@ -16,11 +16,7 @@ import 'package:jmobileflutter/navigation.dart';
 import 'package:provider/provider.dart';
 
 class MenuPrincipalPagina extends StatefulWidget {
-  final Map? itemFilial;
-  const MenuPrincipalPagina({
-    super.key,
-    this.itemFilial,
-  });
+  const MenuPrincipalPagina({super.key});
 
   static const String route = "menu_principal_pagina";
 
@@ -29,12 +25,10 @@ class MenuPrincipalPagina extends StatefulWidget {
 }
 
 class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
+  Databasepadrao banco = Databasepadrao.instance;
   List listsMarket = [];
   final appStyles = AppStyles();
   final appWidgets = AppWidgets();
-  Position? _currentPosition;
-  final TextEditingController _latitudeController = TextEditingController();
-  final TextEditingController _longitudeController = TextEditingController();
   late AuthProvider authProvider;
   late UserProvider userProvider;
   late ConfigProvider configProvider;
@@ -42,8 +36,67 @@ class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
   late Future<void> future;
   Map usuario = {};
 
-  // Adicione um StreamSubscription para monitorar a localização
-  StreamSubscription<Position>? _positionStreamSubscription;
+  // String _textAtualizado = '';
+  String _enviadosText = '';
+  String _vendasText = '';
+
+  // Função para atualizar os dados
+  Future<void> _atualizarDados() async {
+    // Consultas SQL
+    const String sqlNaoEnviado = '''
+      SELECT COUNT(*) AS total 
+      FROM MOBILE_PEDIDO 
+      WHERE  datamobile IS NULL 
+    ''';
+    // AND datahora BETWEEN ? AND ?
+
+    const String sqlNrVendas = '''
+      SELECT COUNT(*) AS total 
+      FROM MOBILE_PEDIDO 
+    ''';
+    // WHERE datahora BETWEEN ? AND ?
+
+    try {
+      // Definir datas
+      final DateTime now = DateTime.now();
+      final DateTime inicioDia = DateTime(now.year, now.month, now.day, 0, 0, 1);
+      final DateTime fimDia = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+      var resultNaoEnviado = await banco.dataReturnFull(sqlNaoEnviado);
+      var resultNrVendas = await banco.dataReturnFull(sqlNrVendas);
+
+      final int naoEnviado = resultNaoEnviado.isNotEmpty ? resultNaoEnviado.first['total'] as int : 0;
+
+      final int nrVendas = resultNrVendas.isNotEmpty ? resultNrVendas.first['total'] as int : 0;
+
+      // Atualizar texto para exibição
+      setState(() {
+        // _textAtualizado =
+        //     'Atualizado em: ${DateTime.now().toString()}\nLatitude: ${_lerINI('Localizacao', 'Latitude')}\nLongitude: ${_lerINI('Localizacao', 'Longitude')}';
+
+        switch (naoEnviado) {
+          case 0:
+            _enviadosText = 'Todos Enviados';
+            break;
+          default:
+            _enviadosText = '$naoEnviado Pedidos a Enviar';
+        }
+
+        switch (nrVendas) {
+          case 0:
+            _vendasText = 'Nenhuma venda';
+            break;
+          case 1:
+            _vendasText = '1 Venda';
+            break;
+          default:
+            _vendasText = '$nrVendas Vendas';
+        }
+      });
+    } catch (e) {
+      print('Erro ao atualizar dados: $e');
+    }
+  }
 
   Future<void> initScreen() async {
     authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -53,8 +106,9 @@ class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
     configProvider.version();
     dataProvider = Provider.of<DataProvider>(context, listen: false);
     usuario = await dataProvider.loadDataToSend(uri: 'login');
-    await _getCurrentLocation();
-    _startListeningToLocationChanges(); // Inicia o monitoramento da localização
+    await dataProvider.getCurrentLocation(context);
+    dataProvider.startListeningToLocationChanges(context); // Inicia o monitoramento da localização
+    _atualizarDados();
     setState(() {});
   }
 
@@ -67,64 +121,8 @@ class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
   @override
   void dispose() {
     // Cancela o stream quando o widget for descartado
-    _positionStreamSubscription?.cancel();
+    dataProvider.positionStreamSubscription?.cancel();
     super.dispose();
-  }
-
-  Future<void> _getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('O serviço de localização está desativado.')),
-      );
-      return;
-    }
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Permissão de localização negada.')),
-        );
-        return;
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Permissão de localização negada permanentemente.')),
-      );
-      return;
-    }
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    setState(() {
-      _currentPosition = position;
-      _latitudeController.text = position.latitude.toString();
-      _longitudeController.text = position.longitude.toString();
-    });
-  }
-
-  void _startListeningToLocationChanges() {
-    _positionStreamSubscription = Geolocator.getPositionStream(
-      locationSettings: LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10, // Atualiza a cada 10 metros de mudança
-      ),
-    ).listen((Position position) {
-      setState(() {
-        _currentPosition = position;
-        _latitudeController.text = position.latitude.toString();
-        _longitudeController.text = position.longitude.toString();
-      });
-    });
-
-    // Detecta quando o serviço de localização é desativado
-    Geolocator.getServiceStatusStream().listen((ServiceStatus status) {
-      if (status == ServiceStatus.disabled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('O serviço de localização foi desativado.')),
-        );
-      }
-    });
   }
 
   @override
@@ -155,12 +153,18 @@ class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text("Cancelar"),
+                          child: const Text(
+                            "Cancelar",
+                            style: TextStyle(color: Colors.black),
+                          ),
                         ),
                         SizedBox(width: 10),
                         TextButton(
                           onPressed: () => pushAndRemoveUntil(context, LoginScreen()),
-                          child: const Text("Sair"),
+                          child: const Text(
+                            "Sair",
+                            style: TextStyle(color: Colors.black),
+                          ),
                         ),
                       ],
                     ),
@@ -169,7 +173,7 @@ class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
               ),
             ],
             bottom: PreferredSize(
-              preferredSize: Size.fromHeight(55),
+              preferredSize: Size.fromHeight(80),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18.0),
                 child: Column(
@@ -178,21 +182,54 @@ class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
                       "Olá, ${usuario['NOME']}",
                       style: TextStyle(fontSize: 16, color: appStyles.colorWhite),
                     ),
-                    Divider(),
+                    SizedBox(height: 4),
                     Row(
                       children: [
                         Text(
-                          "Long.: ${_longitudeController.text}",
+                          "Long.: ${dataProvider.longitudeController.text}",
                           style: TextStyle(fontSize: 16, color: appStyles.colorWhite),
                         ),
                         const Spacer(),
                         Text(
-                          "Lat.: ${_latitudeController.text}",
+                          "Lat.: ${dataProvider.latitudeController.text}",
                           style: TextStyle(fontSize: 16, color: appStyles.colorWhite),
                         ),
                       ],
                     ),
-                    Divider(),
+                    // SizedBox(height: 4),
+                    Divider(color: appStyles.colorWhite),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text(
+                              _vendasText,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Container(
+                              height: 20,
+                              width: 1,
+                              color: Colors.white,
+                            ),
+                            Text(
+                              _enviadosText,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
                   ],
                 ),
               ),
@@ -202,20 +239,6 @@ class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
             padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
             child: Column(
               children: [
-                const SizedBox(height: 10),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButtonWidget(
-                        label: 'Nenhuma Venda',
-                        onPressed: () {
-                          push(context, ProdutosListaScreen());
-                        }),
-                    const SizedBox(width: 10),
-                    ElevatedButtonWidget(label: 'Todos Enviados', onPressed: () {}),
-                  ],
-                ),
                 Expanded(
                   child: MainMenuList(
                     userProvider: userProvider,

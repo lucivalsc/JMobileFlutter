@@ -80,7 +80,7 @@ class MainApp extends StatelessWidget {
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
               textStyle: const TextStyle(color: Colors.black),
-              //   backgroundColor: appStyles.primaryColor,
+                // backgroundColor: appStyles.primaryColor,
               //   foregroundColor: appStyles.colorWhite,
             ),
           ),

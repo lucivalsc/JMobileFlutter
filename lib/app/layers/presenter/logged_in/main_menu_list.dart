@@ -21,6 +21,44 @@ class MainMenuList extends StatefulWidget {
 class _MainMenuListState extends State<MainMenuList> {
   final appStyles = AppStyles();
   final appWidgets = AppWidgets();
+
+  final List<Map<String, dynamic>> listButtons = [
+    {
+      'title': 'Pedidos',
+      'route': 'pedidos_lista_screen',
+      'icon': Icons.shopping_bag,
+    },
+    {
+      'title': 'A Receber',
+      'route': 'conta_receber_lista_screen',
+      'icon': Icons.attach_money_rounded,
+    },
+    {
+      'title': 'Relatórios',
+      'route': 'relatorios_screen',
+      'icon': Icons.bar_chart_outlined,
+    },
+    {
+      'title': 'Produtos',
+      'route': 'produtos_lista_screen',
+      'icon': Icons.shopping_bag,
+    },
+    {
+      'title': 'Clientes',
+      'route': 'clientes_lista_screen',
+      'icon': Icons.people,
+    },
+    {
+      'title': 'Sincronizar',
+      'route': 'sincronizar_screen',
+      'icon': Icons.autorenew,
+    },
+    {
+      'title': 'Configurações',
+      'route': 'configuracao_screen',
+      'icon': Icons.settings,
+    },
+  ];
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -43,7 +81,7 @@ class _MainMenuListState extends State<MainMenuList> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 5,
                     mainAxisSpacing: 5,
-                    childAspectRatio: 1,
+                    childAspectRatio: 1.4,
                   ),
                   itemCount: listButtons.length,
                   itemBuilder: (context, index) {
@@ -62,31 +100,3 @@ class _MainMenuListState extends State<MainMenuList> {
     );
   }
 }
-
-final List<Map<String, dynamic>> listButtons = [
-  {
-    'title': 'Pedidos',
-    'route': 'pedidos_lista_screen',
-    'icon': Icons.shopping_bag,
-  },
-  {
-    'title': 'Sincronizar',
-    'route': 'sincronizar_screen',
-    'icon': Icons.autorenew,
-  },
-  {
-    'title': 'Configurações',
-    'route': 'configuracao_screen',
-    'icon': Icons.settings,
-  },
-  {
-    'title': 'A Receber',
-    'route': 'receber_screen',
-    'icon': Icons.attach_money_rounded,
-  },
-  {
-    'title': 'Relatórios',
-    'route': 'relatorios_screen',
-    'icon': Icons.bar_chart_outlined,
-  },
-];

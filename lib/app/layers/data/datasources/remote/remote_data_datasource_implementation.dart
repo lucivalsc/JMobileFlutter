@@ -23,62 +23,48 @@ class RemoteDataDatasourceImplementation implements IRemoteDataDatasource {
 
   @override
   Future<List<Object>> datas(List<Object> objects) async {
-    final user = objects[0] as String;
-    final password = objects[1] as String;
-    final dataini = objects[2] as String;
-    final datafin = objects[3] as String;
-    final branch = jsonDecode(objects[4] as String);
-    final rota = objects[5] as String;
-    final ano = objects[6] as int;
+    final method = objects[0] as String;
+    final route = objects[1] as String;
+    final payLoad = objects[2] as Map<String, dynamic>;
+    final Endpoints endpoints = Endpoints();
+    await endpoints.basicAuth();
 
-    final filialini = branch['filialPadrao'].toString();
-    final ip = branch['ip'] ?? 'rel.mecgestao.com.br';
-    final porta = branch['portaServer'] ?? '443';
-    final cnpj = branch['cnpj'].toString().replaceAll('.', '').replaceAll('/', '').replaceAll('-', '');
-
-    final token = (objects[7] as Map)['access'];
-    final method = objects.length == 9 ? (objects[8] as String) : 'POST';
-
-    Map<String, dynamic> payLoad = {};
-    if (ano > 0) {
-      payLoad = {
-        "user": user,
-        "ano": ano,
-        "filial": filialini,
-      };
-    } else {
-      payLoad = {
-        "user": user,
-        "password": password,
-        "filial": filialini,
-        "dataini": dataini,
-        "datafin": datafin,
-      };
-    }
-    final baseUrl = 'https://$ip:$porta/relatorio/$cnpj/$rota';
+    final baseUrl = 'http://${endpoints.host}:${endpoints.porta}/$route';
     try {
       HttpResponse response;
       if (method == 'GET') {
         response = await client.get(
           url: baseUrl,
-          headers: Map.from(headers)
-            ..addAll({
-              "Authorization": "Bearer $token",
-            }),
+          headers: {
+            "Content-Type": "application/json",
+            "Connection": "keep-alive",
+            'authorization': await endpoints.basicAuth(),
+          },
         );
       } else {
         response = await client.post(
           url: baseUrl,
-          headers: Map.from(headers)
-            ..addAll({
-              "Authorization": "Bearer $token",
-            }),
+          headers: {
+            "Content-Type": "application/json",
+            "Connection": "keep-alive",
+            'authorization': await endpoints.basicAuth(),
+          },
           payload: payLoad,
         );
       }
 
-      if (response.statusCode >= 200 && response.statusCode < 300 && response.data['success'] == true) {
-        return [response.data];
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (response.data is List) {
+          return [response.data];
+        }
+        if (response.data is String) {
+          throw ServerException(
+            statusCode: response.statusCode,
+            message: 'Erro no servidor',
+          );
+        } else {
+          return [response.data];
+        }
       } else {
         throw ServerException(
           statusCode: response.statusCode,
@@ -102,7 +88,7 @@ class RemoteDataDatasourceImplementation implements IRemoteDataDatasource {
     final porta = branch['portaServer'] ?? '443';
     final cnpj = branch['cnpj'].toString().replaceAll('.', '').replaceAll('/', '').replaceAll('-', '');
 
-    final baseUrl = 'https://$ip:$porta/relatorio/$cnpj/$rota';
+    final baseUrl = 'http://$ip:$porta/relatorio/$cnpj/$rota';
     try {
       HttpResponse response;
       if (method == 'GET') {
@@ -188,14 +174,18 @@ class RemoteDataDatasourceImplementation implements IRemoteDataDatasource {
 
   @override
   Future<List<Object>> synchronous(List<Object> objects) async {
+    Databasepadrao banco = Databasepadrao.instance;
+    var key = objects[0] as String;
+    var idFilial = objects[1] as int;
+    var cdUser = objects[2] as int;
+
     final Endpoints endpoints = Endpoints();
     await endpoints.basicAuth();
-    Databasepadrao banco = Databasepadrao.instance;
-    var url = 'http://${endpoints.host}:${endpoints.porta}/ProcessarDados?key="start"&idFilial=${-1}&cd_user=${-1}';
+    var url = 'http://${endpoints.host}:${endpoints.porta}/ProcessarDados?key=$key&idFilial=$idFilial&cd_user=$cdUser';
 
     try {
       response = await client.postPdf(
-        url: '${url}api/addresses',
+        url: url,
         headers: {
           "Content-Type": "application/json",
           "Connection": "keep-alive",
@@ -224,7 +214,7 @@ class RemoteDataDatasourceImplementation implements IRemoteDataDatasource {
         });
       }
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return [response.data];
+        return [];
       } else {
         throw ServerException(
           statusCode: response.statusCode,

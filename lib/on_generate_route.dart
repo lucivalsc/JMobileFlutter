@@ -3,6 +3,7 @@ import "package:jmobileflutter/app/layers/presenter/logged_in/screens/clientes/c
 import "package:jmobileflutter/app/layers/presenter/logged_in/screens/configuracao/configuracao_screen.dart";
 import "package:jmobileflutter/app/layers/presenter/logged_in/screens/pedidos/pedidos_lista_screen.dart";
 import "package:jmobileflutter/app/layers/presenter/logged_in/screens/produtos/produtos_lista_screen.dart";
+import "package:jmobileflutter/app/layers/presenter/logged_in/screens/conta_receber/conta_receber_lista_screen.dart";
 import "package:jmobileflutter/app/layers/presenter/logged_in/screens/sincronizar/sincronizar_screen.dart";
 import "package:jmobileflutter/starter.dart";
 import "package:flutter/material.dart";
@@ -28,9 +29,11 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     case PedidosListaScreen.route:
       return pageRouteBuilder(PedidosListaScreen());
     case ClientesListaScreen.route:
-      return pageRouteBuilder(ClientesListaScreen(isFromPedido: args![0]));
+      return pageRouteBuilder(ClientesListaScreen(isFromPedido: args?[0] ?? false));
     case ProdutosListaScreen.route:
-      return pageRouteBuilder(ProdutosListaScreen(isFromPedido: args![0]));
+      return pageRouteBuilder(ProdutosListaScreen(isFromPedido: args?[0] ?? false));
+    case ContaReceberListaScreen.route:
+      return pageRouteBuilder(const ContaReceberListaScreen());
   }
 
   return null;

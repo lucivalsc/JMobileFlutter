@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:jmobileflutter/app/common/styles/app_styles.dart';
+import 'package:jmobileflutter/app/common/utils/functions.dart';
+import 'package:jmobileflutter/app/common/widgets/elevated_button_widget.dart';
+import 'package:jmobileflutter/app/layers/data/datasources/local/banco_datasource_implementation.dart';
+import 'package:jmobileflutter/app/layers/presenter/providers/data_provider.dart';
+import 'package:provider/provider.dart';
 
 class ClientesCadastroScreen extends StatefulWidget {
   final Map? cliente;
@@ -11,311 +16,368 @@ class ClientesCadastroScreen extends StatefulWidget {
 
 class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
+  final Databasepadrao banco = Databasepadrao.instance;
 
+  // Cliente
   final TextEditingController _nomeController = TextEditingController();
-  final TextEditingController _latitudeController = TextEditingController();
-  final TextEditingController _longitudeController = TextEditingController();
-  final TextEditingController _enderecoController = TextEditingController();
+  final TextEditingController _dataNascController = TextEditingController();
   final TextEditingController _telefoneController = TextEditingController();
-  final TextEditingController _documentoController = TextEditingController();
-  final TextEditingController _fornecedorController = TextEditingController();
-  final TextEditingController _observacoesController = TextEditingController();
-  final TextEditingController _concorrenteController = TextEditingController();
-  final TextEditingController _especialidadeOutraController = TextEditingController();
+  final TextEditingController _diaVencimentoController = TextEditingController();
+  bool naoVender = false; // FLAGNAOVENDER como Checkbox
+  final TextEditingController _codigoController = TextEditingController();
+  final TextEditingController _profissaoController = TextEditingController();
 
-  String? _especialidadeCliente;
-  String? _servicosOficina;
+  // Documentos
+  final TextEditingController _cpfController = TextEditingController();
+  final TextEditingController _identidadeController = TextEditingController();
+  final TextEditingController _localTrabalhoController = TextEditingController();
+  final TextEditingController _limiteCreditoController = TextEditingController();
 
-  List<String> especialidades = ['Retífica', 'Auto Center', 'Outra'];
-  List<String> servicos = ['Suspensão', 'Motor', 'Mecânica em geral', 'Elétrica', 'Outras especialidades'];
+  // Endereço
+  final TextEditingController _cepController = TextEditingController();
+  final TextEditingController _numeroLogradouroController = TextEditingController();
+  final TextEditingController _enderecoController = TextEditingController();
+  final TextEditingController _estadoController = TextEditingController();
+  final TextEditingController _cidadeController = TextEditingController();
+  final TextEditingController _bairroController = TextEditingController();
+  final TextEditingController _complementoLogradouroController = TextEditingController();
 
-  Position? _currentPosition;
+  // Cônjuge
+  final TextEditingController _conjugeController = TextEditingController();
+  final TextEditingController _telefoneConjugeController = TextEditingController();
+
+  // Filiação
+  final TextEditingController _filiacaoMaeController = TextEditingController();
+  final TextEditingController _telefoneMaeController = TextEditingController();
+  final TextEditingController _filiacaoPaiController = TextEditingController();
+  final TextEditingController _telefonePaiController = TextEditingController();
+  final TextEditingController _obsController = TextEditingController();
 
   late TabController _tabController;
+  late bool isEditing;
+
+  late DataProvider dataProvider;
+  late Future<void> future;
+  final appStyles = AppStyles();
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _nomeController.dispose();
+    _dataNascController.dispose();
+    _cpfController.dispose();
+    _identidadeController.dispose();
+    _localTrabalhoController.dispose();
+    _limiteCreditoController.dispose();
+    _cepController.dispose();
+    _numeroLogradouroController.dispose();
+    _enderecoController.dispose();
+    _estadoController.dispose();
+    _cidadeController.dispose();
+    _bairroController.dispose();
+    _complementoLogradouroController.dispose();
+    _conjugeController.dispose();
+    _telefoneConjugeController.dispose();
+    _filiacaoMaeController.dispose();
+    _telefoneMaeController.dispose();
+    _filiacaoPaiController.dispose();
+    _telefonePaiController.dispose();
+    _obsController.dispose();
+
+    super.dispose();
+  }
+
+  Map usuario = {};
+  Future<void> initScreen({String flag = 'S'}) async {
+    dataProvider = Provider.of<DataProvider>(context, listen: false);
+    usuario = await dataProvider.loadDataToSend(uri: 'login');
+    var usuarioView = await dataProvider.datasResponse(
+      context,
+      route: 'ClienteDetalhe?Codigo=${widget.cliente!['CODIGO'].toString()}',
+    );
+
+    setState(() {});
+  }
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    if (widget.cliente != null) {
-      _nomeController.text = widget.cliente!['name'] ?? '';
-      _latitudeController.text = widget.cliente!['location']?['latitude']?.toString() ?? '';
-      _longitudeController.text = widget.cliente!['location']?['longitude']?.toString() ?? '';
-      _enderecoController.text = widget.cliente!['address'] ?? '';
-      _telefoneController.text = widget.cliente!['phone'] ?? '';
-      _documentoController.text = widget.cliente!['document'] ?? '';
+    future = initScreen();
+    _tabController = TabController(length: 5, vsync: this);
+    isEditing = widget.cliente != null;
+
+    if (isEditing) {
+      _nomeController.text = widget.cliente!['NOMECLI'] ?? '';
+      _codigoController.text = widget.cliente!['CODCLI'].toString() ?? '';
+      _enderecoController.text = widget.cliente!['ENDERECO'] ?? '';
+      _bairroController.text = widget.cliente!['BAIRRO'] ?? '';
+      _cidadeController.text = widget.cliente!['CIDADE'] ?? '';
+      _estadoController.text = widget.cliente!['ESTADO'] ?? '';
+      _cepController.text = widget.cliente!['CEP'] ?? '';
+      _telefoneController.text = widget.cliente!['TELEFONE'] ?? '';
+      _cpfController.text = widget.cliente!['CPF'] ?? '';
+      _limiteCreditoController.text = widget.cliente!['LIMITECRED']?.toString() ?? '';
+      _identidadeController.text = widget.cliente!['IDENTIDADE'] ?? '';
+      _dataNascController.text = widget.cliente!['DATNASC'] ?? '';
+      _filiacaoMaeController.text = widget.cliente!['FILIACAO'] ?? '';
+      _profissaoController.text = widget.cliente!['PROFISSAO'] ?? '';
+      _obsController.text = widget.cliente!['OBS'] ?? '';
+      _numeroLogradouroController.text = widget.cliente!['NUMEROLOGRADOURO'] ?? '';
+      _complementoLogradouroController.text = widget.cliente!['COMPLEMENTOLOGRADOURO'] ?? '';
+      _diaVencimentoController.text = widget.cliente!['DIAVENCIMENTO']?.toString() ?? '';
+      naoVender = widget.cliente!['FLAGNAOVENDER'] == 'S'; // Checkbox
     }
-    _getCurrentLocation();
   }
 
-  void _getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
+  void _salvarCliente() async {
+    // if (_formKey.currentState!.validate()) {
+    var cliente = {
+      "IDUSUARIO": usuario['IDUSUARIO'],
+      "NOMECLI": _nomeController.text,
+      "CODCLI": _codigoController.text,
+      "ENDERECO": _enderecoController.text,
+      "BAIRRO": _bairroController.text,
+      "CIDADE": _cidadeController.text,
+      "ESTADO": _estadoController.text,
+      "CEP": _cepController.text,
+      "TELEFONE": _telefoneController.text,
+      "CPF": _cpfController.text,
+      "LIMITECRED": double.tryParse(_limiteCreditoController.text) ?? 0.0,
+      "IDENTIDADE": _identidadeController.text,
+      "DATNASC": _dataNascController.text,
+      "FILIACAO": _filiacaoMaeController.text,
+      "PROFISSAO": _profissaoController.text,
+      "OBS": _obsController.text,
+      "NUMEROLOGRADOURO": _numeroLogradouroController.text,
+      "COMPLEMENTOLOGRADOURO": _complementoLogradouroController.text,
+      "DIAVENCIMENTO": int.tryParse(_diaVencimentoController.text),
+      "FLAGNAOVENDER": naoVender ? 'S' : 'N', // Checkbox
+      "LATITUDE": dataProvider.latitudeController.text,
+      "LONGITUDE": dataProvider.longitudeController.text,
+    };
+    final contatos = [
+      {
+        "IDUSUARIO": usuario['IDUSUARIO'],
+        "NOME": _conjugeController.text,
+        "TELEFONE": _telefoneConjugeController.text,
+        "EMAIL": "",
+        "SETOR": "E", // Cônjuge
+      },
+      {
+        "IDUSUARIO": usuario['IDUSUARIO'],
+        "NOME": _filiacaoMaeController.text,
+        "TELEFONE": _telefoneMaeController.text,
+        "EMAIL": "",
+        "SETOR": "M", // Mãe
+      },
+      {
+        "IDUSUARIO": usuario['IDUSUARIO'],
+        "NOME": _filiacaoPaiController.text,
+        "TELEFONE": _telefonePaiController.text,
+        "EMAIL": "",
+        "SETOR": "P", // Pai
+      },
+    ];
+    try {
+      await banco.gravarCliente(cliente: cliente, contatos: contatos);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('O serviço de localização está desativado.')),
+        SnackBar(content: Text('Cliente cadastrado com sucesso!')),
       );
-      return;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Permissão de localização negada.')),
-        );
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Permissão de localização negada permanentemente.')),
-      );
-      return;
-    }
-
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    setState(() {
-      _currentPosition = position;
-      _latitudeController.text = position.latitude.toString();
-      _longitudeController.text = position.longitude.toString();
-    });
-  }
-
-  void _salvarCliente() {
-    if (_formKey.currentState!.validate()) {
-      if (_currentPosition == null ||
-          _latitudeController.text != _currentPosition!.latitude.toString() ||
-          _longitudeController.text != _currentPosition!.longitude.toString()) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Você está fora da localização do cliente!')),
-        );
-        return;
-      }
-
-      final cliente = {
-        "name": _nomeController.text,
-        "location": {
-          "latitude": double.tryParse(_latitudeController.text) ?? 0.0,
-          "longitude": double.tryParse(_longitudeController.text) ?? 0.0,
-        },
-        "address": _enderecoController.text,
-        "phone": _telefoneController.text,
-        "document": _documentoController.text,
-        "fornecedor": _fornecedorController.text,
-        "observacoes": _observacoesController.text,
-        "concorrente": _concorrenteController.text,
-        "especialidadeCliente": _especialidadeCliente,
-        "servicosOficina": _servicosOficina,
-        "especialidadeOutra": _especialidadeCliente == 'Outra' ? _especialidadeOutraController.text : null,
-      };
-
-      if (widget.cliente != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cliente atualizado: ${cliente['name']}')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cliente cadastrado: ${cliente['name']}')),
-        );
-      }
-
       Navigator.pop(context, cliente);
+      print('Cliente e contatos gravados com sucesso!');
+    } catch (e) {
+      print('Erro ao gravar cliente: $e');
     }
+    // }
   }
 
-  void _excluirCliente() {
-    if (widget.cliente != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Cliente ${widget.cliente!['name']} excluído')),
-      );
-      Navigator.pop(context, null); // Retorna para a tela anterior
-    }
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    bool isRequired = false,
+    String? Function(String?)? customValidator,
+    Function(String)? onChanged,
+  }) {
+    return TextFormField(
+      controller: controller,
+      readOnly: isEditing,
+      decoration: InputDecoration(labelText: label),
+      validator: isRequired
+          ? (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Campo obrigatório';
+              }
+              if (customValidator != null) {
+                return customValidator(value);
+              }
+              return null;
+            }
+          : customValidator,
+      onChanged: onChanged,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.cliente != null;
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Editar Cliente' : 'Cadastro de Cliente'),
+        title: Text(isEditing ? 'Visualizar Cliente' : 'Cadastro de Cliente'),
         bottom: TabBar(
+          labelColor: Colors.white,
+          isScrollable: true,
           controller: _tabController,
-          tabs: [
-            Tab(text: 'Informações Básicas'),
-            Tab(text: 'Especialidade e Serviços'),
+          tabs: const [
+            Tab(text: 'Cliente'),
+            Tab(text: 'Documentos'),
+            Tab(text: 'Endereço'),
+            Tab(text: 'Cônjuge'),
+            Tab(text: 'Filiação'),
           ],
         ),
       ),
-      body: Column(
+      body: TabBarView(
+        controller: _tabController,
         children: [
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
+          // Aba 1: Cliente
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                children: [
+                  _buildTextField(label: 'Nome do Cliente', controller: _nomeController, isRequired: true),
+                  // _buildTextField(label: 'Código do Cliente', controller: _codigoController, isRequired: true),
+                  _buildTextField(
+                    label: 'Data de Nascimento',
+                    controller: _dataNascController,
+                    isRequired: true,
+                    customValidator: (value) {
+                      if (!RegExp(r'^\d{2}/\d{2}/\d{4}$').hasMatch(value ?? '')) {
+                        return 'Formato inválido (DD/MM/AAAA)';
+                      }
+                      return null;
+                    },
+                  ),
+                  _buildTextField(label: 'Telefone', controller: _telefoneController, isRequired: true),
+                  _buildTextField(label: 'Profissão', controller: _profissaoController),
+                  _buildTextField(label: 'Dia Vencimento', controller: _diaVencimentoController),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: naoVender,
+                        onChanged: isEditing
+                            ? null
+                            : (value) {
+                                setState(() {
+                                  naoVender = value ?? false;
+                                });
+                              },
+                      ),
+                      const Text('Não Vender'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Aba 2: Documentos
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _formKey,
-                    child: ListView(
-                      children: [
-                        TextFormField(
-                          controller: _nomeController,
-                          decoration: const InputDecoration(labelText: 'Nome'),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'O nome é obrigatório.';
-                            }
-                            return null;
-                          },
-                        ),
-                        TextFormField(
-                          controller: _latitudeController,
-                          decoration: const InputDecoration(labelText: 'Latitude'),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'A latitude é obrigatória.';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'A latitude deve ser um número válido.';
-                            }
-                            return null;
-                          },
-                        ),
-                        TextFormField(
-                          controller: _longitudeController,
-                          decoration: const InputDecoration(labelText: 'Longitude'),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'A longitude é obrigatória.';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'A longitude deve ser um número válido.';
-                            }
-                            return null;
-                          },
-                        ),
-                        TextFormField(
-                          controller: _enderecoController,
-                          decoration: const InputDecoration(labelText: 'Endereço'),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'O endereço é obrigatório.';
-                            }
-                            return null;
-                          },
-                        ),
-                        TextFormField(
-                          controller: _telefoneController,
-                          decoration: const InputDecoration(labelText: 'Telefone'),
-                          keyboardType: TextInputType.phone,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'O telefone é obrigatório.';
-                            }
-                            if (!RegExp(r'^\(\d{2}\)\s?\d{4,5}-\d{4}$').hasMatch(value)) {
-                              return 'Insira um telefone válido. Ex: (11) 98765-4321';
-                            }
-                            return null;
-                          },
-                        ),
-                        TextFormField(
-                          controller: _documentoController,
-                          decoration: const InputDecoration(labelText: 'Documento'),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'O documento é obrigatório.';
-                            }
-                            if (!RegExp(r'^\d{3}\.\d{3}\.\d{3}-\d{2}$').hasMatch(value)) {
-                              return 'Insira um CPF válido. Ex: 123.456.789-10';
-                            }
-                            return null;
-                          },
-                        ),
-                        TextFormField(
-                          controller: _fornecedorController,
-                          decoration: const InputDecoration(labelText: 'Principal Fornecedor'),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'O fornecedor é obrigatório.';
-                            }
-                            return null;
-                          },
-                        ),
-                        TextFormField(
-                          controller: _observacoesController,
-                          decoration: const InputDecoration(labelText: 'Observações'),
-                        ),
-                        TextFormField(
-                          controller: _concorrenteController,
-                          decoration: const InputDecoration(labelText: 'Ações do Concorrente'),
-                        ),
-                      ],
-                    ),
-                  ),
+                _buildTextField(
+                  label: 'CPF',
+                  controller: _cpfController,
+                  isRequired: true,
+                  customValidator: (value) {
+                    if (!RegExp(r'^\d{3}\.\d{3}\.\d{3}-\d{2}$').hasMatch(value ?? '')) {
+                      return 'CPF inválido (XXX.XXX.XXX-XX)';
+                    }
+                    return null;
+                  },
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _formKey,
-                    child: ListView(
-                      children: [
-                        DropdownButtonFormField<String>(
-                          value: _especialidadeCliente,
-                          decoration: const InputDecoration(labelText: 'Especialidade'),
-                          items: especialidades.map((especialidade) {
-                            return DropdownMenuItem<String>(
-                              value: especialidade,
-                              child: Text(especialidade),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _especialidadeCliente = value;
-                            });
-                          },
-                        ),
-                        if (_especialidadeCliente == 'Outra') ...[
-                          TextFormField(
-                            controller: _especialidadeOutraController,
-                            decoration: const InputDecoration(labelText: 'Especifique a Especialidade'),
-                          ),
-                        ],
-                        DropdownButtonFormField<String>(
-                          value: _servicosOficina,
-                          decoration: const InputDecoration(labelText: 'Serviços da Oficina'),
-                          items: servicos.map((servico) {
-                            return DropdownMenuItem<String>(
-                              value: servico,
-                              child: Text(servico),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _servicosOficina = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+                _buildTextField(
+                  label: 'Identidade',
+                  controller: _identidadeController,
+                  isRequired: true,
                 ),
+                _buildTextField(label: 'Limite de Crédito', controller: _limiteCreditoController),
+                _buildTextField(label: 'Local de Trabalho', controller: _localTrabalhoController),
+              ],
+            ),
+          ),
+          // Aba 3: Endereço
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
+              children: [
+                _buildTextField(
+                  label: 'CEP',
+                  controller: _cepController,
+                  isRequired: true,
+                  onChanged: (p0) async {
+                    try {
+                      // Consulta o endereço pelo CEP
+                      if (p0.toString().length <= 7) return;
+                      Map<String, dynamic> endereco = await buscarEnderecoPorCep(p0);
+
+                      // Preenche os controladores com os dados retornados
+                      _enderecoController.text = endereco['logradouro'] ?? '';
+                      _complementoLogradouroController.text = endereco['complemento'] ?? '';
+                      _bairroController.text = endereco['bairro'] ?? '';
+                      _cidadeController.text = endereco['localidade'] ?? '';
+                      _estadoController.text = endereco['uf'] ?? '';
+
+                      print('Endereço preenchido com sucesso!'); // Log para depuração
+                    } catch (e) {
+                      print('Erro ao preencher endereço: $e');
+                      rethrow; // Relança a exceção para tratamento externo, se necessário
+                    }
+                  },
+                ),
+                _buildTextField(label: 'Endereço', controller: _enderecoController, isRequired: true),
+                _buildTextField(label: 'Número Logradouro', controller: _numeroLogradouroController, isRequired: true),
+                _buildTextField(label: 'Complemento Logradouro', controller: _complementoLogradouroController),
+                _buildTextField(label: 'Bairro', controller: _bairroController, isRequired: true),
+                _buildTextField(label: 'Cidade', controller: _cidadeController, isRequired: true),
+                _buildTextField(label: 'Estado', controller: _estadoController, isRequired: true),
+              ],
+            ),
+          ),
+          // Aba 4: Cônjuge
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
+              children: [
+                _buildTextField(label: 'Nome do Cônjuge', controller: _conjugeController),
+                _buildTextField(label: 'Telefone do Cônjuge', controller: _telefoneConjugeController),
+              ],
+            ),
+          ),
+          // Aba 5: Filiação
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
+              children: [
+                _buildTextField(label: 'Nome da Mãe', controller: _filiacaoMaeController, isRequired: true),
+                _buildTextField(label: 'Telefone da Mãe', controller: _telefoneMaeController),
+                _buildTextField(label: 'Nome do Pai', controller: _filiacaoPaiController),
+                _buildTextField(label: 'Telefone do Pai', controller: _telefonePaiController),
+                _buildTextField(label: 'Observações', controller: _obsController),
               ],
             ),
           ),
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          onPressed: _salvarCliente,
-          child: Text(isEditing ? 'Atualizar Cliente' : 'Cadastrar Cliente'),
-        ),
-      ),
+      bottomNavigationBar: isEditing
+          ? null
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButtonWidget(
+                onPressed: _salvarCliente,
+                label: 'Cadastrar Cliente',
+              ),
+            ),
     );
   }
 }

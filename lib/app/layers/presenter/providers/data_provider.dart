@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:geolocator/geolocator.dart';
 import 'package:jmobileflutter/app/layers/domain/usecases/data/datas_usecase.dart';
 import 'package:jmobileflutter/app/layers/domain/usecases/data/synchronous_usecase.dart';
 import 'package:jmobileflutter/app/layers/domain/usecases/storage/delete_data_to_send_usecase.dart';
@@ -33,12 +34,78 @@ class DataProvider extends ChangeNotifier {
   void setUserProvider(UserProvider provider) => userProvider = provider;
   void setAuthProvider(AuthProvider provider) => authProvider = provider;
 
+  // Lista de opções para tipo de pedido
+  final List tipoPedido = [
+    {'id': 1, 'text': 'Recebido'},
+    {'id': 2, 'text': 'Não Recebido'}
+  ];
+
   int selectedMonth = DateTime.now().month;
   int selectedYear = DateTime.now().year;
   int selectedMonthIndex = 0;
-  // int selectedButtonIndex = 0;
-  // String pInicio = '';
-  // String pFinal = '';
+
+  Position? currentPosition;
+  final TextEditingController latitudeController = TextEditingController();
+  final TextEditingController longitudeController = TextEditingController();
+  // Adicione um StreamSubscription para monitorar a localização
+  StreamSubscription<Position>? positionStreamSubscription;
+  Future<void> getCurrentLocation(BuildContext context) async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('O serviço de localização está desativado.')),
+      );
+      return;
+    }
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Permissão de localização negada.')),
+        );
+        return;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Permissão de localização negada permanentemente.')),
+      );
+      return;
+    }
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    // setState(() {
+    currentPosition = position;
+    latitudeController.text = position.latitude.toString();
+    longitudeController.text = position.longitude.toString();
+    // });
+    notify();
+  }
+
+  void startListeningToLocationChanges(BuildContext context) {
+    positionStreamSubscription = Geolocator.getPositionStream(
+      locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10, // Atualiza a cada 10 metros de mudança
+      ),
+    ).listen((Position position) {
+      // setState(() {
+      currentPosition = position;
+      latitudeController.text = position.latitude.toString();
+      longitudeController.text = position.longitude.toString();
+      // });
+      notify();
+    });
+
+    // Detecta quando o serviço de localização é desativado
+    Geolocator.getServiceStatusStream().listen((ServiceStatus status) {
+      if (status == ServiceStatus.disabled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('O serviço de localização foi desativado.')),
+        );
+      }
+    });
+  }
 
   Future<Map> loadDataToSend({
     required String uri,
@@ -107,8 +174,12 @@ class DataProvider extends ChangeNotifier {
     );
   }
 
-  Future<void> synchronous(BuildContext context) async {
-    final result = await _synchronousUsecase([]);
+  Future<void> synchronous(BuildContext context, {String key = 'start'}) async {
+    final result = await _synchronousUsecase([
+      key,
+      -1,
+      -1,
+    ]);
     result.fold(
       (l) => push(
         context,
@@ -122,6 +193,33 @@ class DataProvider extends ChangeNotifier {
         context,
         SuccessfulScreen(description: 'Sincronizado com sucesso!'),
       ),
+    );
+  }
+
+  Future<List<Object>> datasResponse(
+    BuildContext context, {
+    String method = 'GET',
+    String route = '',
+    Map<String, dynamic>? payLoad,
+  }) async {
+    final result = await _datasUsecase([
+      method,
+      route,
+      payLoad ?? Map<String, dynamic>.from({}),
+    ]);
+    return result.fold(
+      (l) async {
+        await push(
+          context,
+          FailureScreen(
+            failureType: l.failureType,
+            title: l.title,
+            message: l.message,
+          ),
+        );
+        return [];
+      },
+      (r) => r,
     );
   }
 

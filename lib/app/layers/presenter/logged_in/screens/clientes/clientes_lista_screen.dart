@@ -1,11 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:jmobileflutter/app/common/styles/app_styles.dart';
 import 'package:jmobileflutter/app/layers/data/datasources/local/banco_datasource_implementation.dart';
 import 'package:jmobileflutter/app/layers/data/models/debouncer_model.dart';
 import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/clientes/clientes_cadastro_screen.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/vendas/vendas_registro_screen.dart';
+import 'package:jmobileflutter/navigation.dart';
 
 class ClientesListaScreen extends StatefulWidget {
-  final bool isFromPedido;
+  final bool? isFromPedido;
   const ClientesListaScreen({super.key, this.isFromPedido = false});
 
   static const String route = "clientes_lista_screen";
@@ -17,6 +20,7 @@ class ClientesListaScreen extends StatefulWidget {
 class _ClientesListaScreenState extends State<ClientesListaScreen> {
   Databasepadrao banco = Databasepadrao.instance;
   Debouncer debouncer = Debouncer(milliseconds: 500);
+  AppStyles appStyles = AppStyles();
 
   late Future<void> future;
   List listaCliente = [];
@@ -25,7 +29,8 @@ class _ClientesListaScreenState extends State<ClientesListaScreen> {
   TextEditingController searchController = TextEditingController();
 
   Future<void> initScreen() async {
-    listaCliente = await banco.dataReturn("clientes");
+    listaCliente = await banco.dataReturnCliente();
+    print(jsonEncode(listaCliente.first));
     setState(() {
       listaFiltrada = List.from(listaCliente);
       listaFiltrada.sort((a, b) => a["NOMECLI"].toString().compareTo(b["NOMECLI"].toString()));
@@ -36,7 +41,8 @@ class _ClientesListaScreenState extends State<ClientesListaScreen> {
     listaFiltrada = listaCliente.where((cliente) {
       final nome = cliente["NOMECLI"].toString().toLowerCase();
       final cpf = cliente["CPF"].toString();
-      return nome.contains(query.toLowerCase()) || cpf.contains(query);
+      // final flag = cliente["FLAGNAOVENDER"];
+      return nome.contains(query.toLowerCase()) || cpf.contains(query); // || flag.contains('Y');
     }).toList();
     listaFiltrada.sort((a, b) => a["NOMECLI"].toString().compareTo(b["NOMECLI"].toString()));
     setState(() {});
@@ -112,48 +118,69 @@ class _ClientesListaScreenState extends State<ClientesListaScreen> {
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              if (!widget.isFromPedido) ...[
-                                TextButton(
-                                  child: const Text('Registrar Venda'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => VendasRegistroScreen(cliente: item),
-                                      ),
-                                    );
-                                  },
+                            children: [],
+                          ),
+                          actions: [
+                            TextButton(
+                              child: Text(
+                                'Cancelar',
+                                style: TextStyle(
+                                  color: appStyles.primaryColor,
                                 ),
-                                TextButton(
-                                  child: const Text('Editar'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => ClientesCadastroScreen(cliente: item),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                              if (widget.isFromPedido) ...[
-                                TextButton(
-                                  child: const Text('Selecionar'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop(item);
-                                    Navigator.of(context).pop(item);
-                                  },
-                                ),
-                              ],
+                              ),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                            if (!widget.isFromPedido!) ...[
                               TextButton(
-                                child: const Text('Cancelar'),
-                                onPressed: () => Navigator.of(context).pop(),
+                                child: Text(
+                                  'Ver Detalhes',
+                                  style: TextStyle(
+                                    color: appStyles.primaryColor,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ClientesCadastroScreen(cliente: item),
+                                    ),
+                                  );
+                                },
+                              ),
+                              TextButton(
+                                child: Text(
+                                  'Visualizar',
+                                  style: TextStyle(
+                                    color: appStyles.primaryColor,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ClientesCadastroScreen(cliente: item),
+                                    ),
+                                  );
+                                },
                               ),
                             ],
-                          ),
+                            if (widget.isFromPedido!) ...[
+                              TextButton(
+                                child: Text(
+                                  'Selecionar',
+                                  style: TextStyle(
+                                    color: appStyles.primaryColor,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop(item);
+                                  Navigator.of(context).pop(item);
+                                },
+                              ),
+                            ],
+                          ],
                         );
                       },
                     );
@@ -171,6 +198,23 @@ class _ClientesListaScreenState extends State<ClientesListaScreen> {
                               "Endereço: ${item['ENDERECO']} - ${item['BAIRRO']} - ${item['CIDADE']} - ${item['ESTADO']} - ${item['CEP']}"),
                           Text("Telefone: ${item['TELEFONE']}"),
                           Text("Documento: ${item['CPF']}"),
+                          if (item['FLAGNAOVENDER'] == 'Y') ...[
+                            const SizedBox(height: 5),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                              child: const Text(
+                                'Não Vender',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                       trailing: const Icon(
@@ -183,13 +227,11 @@ class _ClientesListaScreenState extends State<ClientesListaScreen> {
               },
             ),
             floatingActionButton: FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ClientesCadastroScreen(),
-                  ),
-                );
+              onPressed: () async {
+                var result = await push(context, ClientesCadastroScreen());
+                if (result != null) {
+                  future = initScreen();
+                }
               },
               label: const Text('Novo Cliente'),
               icon: const Icon(Icons.add),
