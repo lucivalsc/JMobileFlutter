@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:connect_force_app/app/common/utils/functions.dart';
 
 class ItemDataViewWidget extends StatelessWidget {
   final dynamic pedido;

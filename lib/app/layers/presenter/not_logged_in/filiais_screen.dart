@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:connect_force_app/app/layers/presenter/logged_in/main_menu_screen.dart';
 
 class FiliaisScreen extends StatelessWidget {
   final Map data;

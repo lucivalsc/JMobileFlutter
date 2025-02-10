@@ -61,7 +61,7 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
   final TextEditingController _limiteDisponivelController = TextEditingController();
   final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
-  final TextEditingController _setorCadastroController = TextEditingController();
+  final TextEditingController setorCadastroController = TextEditingController();
 
   late TabController _tabController;
   bool isEditing = false;
@@ -118,13 +118,13 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
       _limiteDisponivelController.text = usuarioView!['LIMITEDISPONIVEL'].toString();
       _latitudeController.text = usuarioView!['LATITUDE'].toString();
       _longitudeController.text = usuarioView!['LONGITUDE'].toString();
-      // _setorCadastroController.text = usuarioView!['SETOR'];
+      // setorCadastroController.text = usuarioView!['SETOR'];
     }
     isEditing = widget.cliente != null;
 
     if (isEditing) {
       _nomeController.text = widget.cliente!['NOMECLI'] ?? '';
-      _codigoController.text = widget.cliente!['CODCLI'].toString() ?? '';
+      _codigoController.text = widget.cliente!['CODCLI'].toString();
       _enderecoController.text = widget.cliente!['ENDERECO'] ?? '';
       _bairroController.text = widget.cliente!['BAIRRO'] ?? '';
       _cidadeController.text = widget.cliente!['CIDADE'] ?? '';

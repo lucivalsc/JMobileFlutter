@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:connect_force_app/app/common/styles/app_styles.dart';
 import 'package:connect_force_app/app/common/utils/functions.dart';
 import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
-import 'package:connect_force_app/app/layers/presenter/logged_in/screens/pedidos/pedidos_impressao_screen.dart';
 import 'package:connect_force_app/app/layers/presenter/logged_in/screens/pedidos/pedidos_novo_screen.dart';
 import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
 import 'package:connect_force_app/navigation.dart';
@@ -27,7 +24,7 @@ class _PedidosListaScreenState extends State<PedidosListaScreen> {
   final appStyles = AppStyles();
   List listaPedidos = [];
   List listaFiltrada = [];
-  final TextEditingController _filtroController = TextEditingController();
+  final TextEditingController filtroController = TextEditingController();
 
   // Variáveis para filtros
   String filtroNome = '';

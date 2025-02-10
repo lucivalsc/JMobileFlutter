@@ -1,7 +1,5 @@
-import 'package:connect_force_app/app/common/endpoints/endpoints.dart';
 import 'package:connect_force_app/app/layers/presenter/logged_in/failure_screen.dart';
 import 'package:connect_force_app/app/layers/presenter/logged_in/main_menu_screen.dart';
-import 'package:connect_force_app/app/layers/presenter/not_logged_in/filiais_screen.dart';
 import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
 import 'package:connect_force_app/navigation.dart';
 import 'package:flutter/material.dart';
