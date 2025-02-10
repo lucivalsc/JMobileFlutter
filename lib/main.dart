@@ -1,10 +1,10 @@
-import 'package:jmobileflutter/on_generate_route.dart';
-import 'package:jmobileflutter/starter.dart';
+import 'package:connect_force_app/on_generate_route.dart';
+import 'package:connect_force_app/starter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:flutter_localizations/flutter_localizations.dart";
-import 'package:jmobileflutter/app/common/utils/functions.dart';
-import 'package:jmobileflutter/provider_injections.dart';
+import 'package:connect_force_app/app/common/utils/functions.dart';
+import 'package:connect_force_app/provider_injections.dart';
 import 'package:provider/provider.dart';
 
 import 'app/common/styles/app_styles.dart';

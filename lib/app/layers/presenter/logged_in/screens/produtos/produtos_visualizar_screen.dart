@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/produtos/image_scrape_service.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/screens/produtos/image_scrape_service.dart';
 
 class ProdutosVisualizarScreen extends StatefulWidget {
   final Map<String, dynamic> produto;

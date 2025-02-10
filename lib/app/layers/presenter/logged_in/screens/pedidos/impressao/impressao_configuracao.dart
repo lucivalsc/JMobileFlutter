@@ -1,10 +1,10 @@
 // import 'package:flutter_mobx/flutter_mobx.dart';
 // import 'package:intl/intl.dart';
-// import 'package:jmobileflutter/app/common/theme/cores.dart';
-// import 'package:jmobileflutter/app/common/theme/my_app_bar.dart';
-// import 'package:jmobileflutter/app/common/theme/texto_formatado_lista.dart';
-// import 'package:jmobileflutter/app/layers/presenter/screens/logged_in/view/comercial/pedidos/impressao/imports.dart';
-// import 'package:jmobileflutter/app/layers/presenter/screens/logged_in/view/comercial/pedidos/pedido_store.dart';
+// import 'package:connect_force_app/app/common/theme/cores.dart';
+// import 'package:connect_force_app/app/common/theme/my_app_bar.dart';
+// import 'package:connect_force_app/app/common/theme/texto_formatado_lista.dart';
+// import 'package:connect_force_app/app/layers/presenter/screens/logged_in/view/comercial/pedidos/impressao/imports.dart';
+// import 'package:connect_force_app/app/layers/presenter/screens/logged_in/view/comercial/pedidos/pedido_store.dart';
 // import 'package:bluetooth_thermal_printer_plus/bluetooth_thermal_printer_plus.dart';
 
 // class ImpressaoConfiguracaoScreen extends StatefulWidget {

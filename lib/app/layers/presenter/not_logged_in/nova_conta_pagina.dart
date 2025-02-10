@@ -1,5 +1,5 @@
-import 'package:jmobileflutter/app/common/widgets/elevated_button_widget.dart';
-import 'package:jmobileflutter/app/common/widgets/text_field_widget.dart';
+import 'package:connect_force_app/app/common/widgets/elevated_button_widget.dart';
+import 'package:connect_force_app/app/common/widgets/text_field_widget.dart';
 
 import 'package:flutter/material.dart';
 

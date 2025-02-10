@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
 
 class ItemDataReciboWidget extends StatelessWidget {
   final dynamic pedido;

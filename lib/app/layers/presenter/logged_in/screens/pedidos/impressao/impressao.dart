@@ -1,18 +1,18 @@
-// import 'package:jmobileflutter/app/layers/presenter/screens/logged_in/observacao/observacao_screen.dart';
-// import 'package:jmobileflutter/navigation.dart';
+// import 'package:connect_force_app/app/layers/presenter/screens/logged_in/observacao/observacao_screen.dart';
+// import 'package:connect_force_app/navigation.dart';
 // import 'package:flutter_mobx/flutter_mobx.dart';
 // import 'package:intl/intl.dart';
 // import 'package:uuid/uuid.dart';
 
-// import 'package:jmobileflutter/app/layers/data/datasources/local/banco_controller.dart';
-// import 'package:jmobileflutter/app/common/padrao.dart';
-// import 'package:jmobileflutter/app/common/theme/cores.dart';
-// import 'package:jmobileflutter/app/common/theme/my_app_bar.dart';
-// import 'package:jmobileflutter/app/common/theme/texto_formatado_lista.dart';
-// import 'package:jmobileflutter/app/layers/presenter/screens/logged_in/view/comercial/pedidos/impressao/imports.dart';
-// import 'package:jmobileflutter/app/layers/presenter/screens/logged_in/view/comercial/pedidos/impressao/impressao_configuracao.dart';
-// import 'package:jmobileflutter/app/layers/presenter/screens/logged_in/view/comercial/pedidos/pedido_comum.dart';
-// import 'package:jmobileflutter/app/layers/presenter/screens/logged_in/view/comercial/pedidos/pedido_store.dart';
+// import 'package:connect_force_app/app/layers/data/datasources/local/banco_controller.dart';
+// import 'package:connect_force_app/app/common/padrao.dart';
+// import 'package:connect_force_app/app/common/theme/cores.dart';
+// import 'package:connect_force_app/app/common/theme/my_app_bar.dart';
+// import 'package:connect_force_app/app/common/theme/texto_formatado_lista.dart';
+// import 'package:connect_force_app/app/layers/presenter/screens/logged_in/view/comercial/pedidos/impressao/imports.dart';
+// import 'package:connect_force_app/app/layers/presenter/screens/logged_in/view/comercial/pedidos/impressao/impressao_configuracao.dart';
+// import 'package:connect_force_app/app/layers/presenter/screens/logged_in/view/comercial/pedidos/pedido_comum.dart';
+// import 'package:connect_force_app/app/layers/presenter/screens/logged_in/view/comercial/pedidos/pedido_store.dart';
 
 // class ImpressaoPadrao extends StatefulWidget {
 //   final String? guidOld;

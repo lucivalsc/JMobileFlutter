@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:archive/archive_io.dart';
-import 'package:jmobileflutter/app/common/http/http_client.dart';
-import 'package:jmobileflutter/app/common/models/exception_models.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/banco_datasource_implementation.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/remote/remote_data_datasource.dart';
+import 'package:connect_force_app/app/common/http/http_client.dart';
+import 'package:connect_force_app/app/common/models/exception_models.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
+import 'package:connect_force_app/app/layers/data/datasources/remote/remote_data_datasource.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:jmobileflutter/app/common/endpoints/endpoints.dart';
+import 'package:connect_force_app/app/common/endpoints/endpoints.dart';
 
 class RemoteDataDatasourceImplementation implements IRemoteDataDatasource {
   final Map<String, String> headers = {"Content-Type": "application/json"};
@@ -20,16 +20,36 @@ class RemoteDataDatasourceImplementation implements IRemoteDataDatasource {
   RemoteDataDatasourceImplementation(this.client);
 
   static const url = String.fromEnvironment('DEFINE_API_ADDRESS');
+  Map<String, dynamic> parseNestedJson(String jsonString) {
+    // Passo 1: Converter `value` de String para Map
+    Map<String, dynamic> outerMap = jsonDecode(jsonString);
+
+    // Passo 2: Verificar se `select` é uma String e convertê-lo para Lista<Map<String, dynamic>>
+    if (outerMap.containsKey('select') && outerMap['select'] is List) {
+      List<dynamic> selectList = outerMap['select'];
+      outerMap['select'] = selectList.map((item) {
+        if (item is String) {
+          return jsonDecode(item); // Converte cada item de String para Map
+        }
+        return item;
+      }).toList();
+    }
+
+    return outerMap;
+  }
 
   @override
   Future<List<Object>> datas(List<Object> objects) async {
     final method = objects[0] as String;
     final route = objects[1] as String;
-    final payLoad = objects[2] as Map<String, dynamic>;
+    final payLoad = Map<String, dynamic>.from(objects[2] as Map<String, dynamic>);
     final Endpoints endpoints = Endpoints();
     await endpoints.basicAuth();
-
+    // print(parseNestedJson(payLoad['value']));
+    // payLoad['value']['select'] = jsonDecode(((payLoad['value'])['select'] as List)[0] as String);
+    print(payLoad);
     final baseUrl = 'http://${endpoints.host}:${endpoints.porta}/$route';
+    // print(baseUrl);
     try {
       HttpResponse response;
       if (method == 'GET') {
@@ -198,7 +218,7 @@ class RemoteDataDatasourceImplementation implements IRemoteDataDatasource {
         List<int> zippedContentBytes = [];
         zippedContentBytes.addAll(response.data);
 
-        convertByteContentToMap(zippedContentBytes).then((data) {
+        await convertByteContentToMap(zippedContentBytes).then((data) {
           for (Map screen in data) {
             if (screen['data'].isNotEmpty) {
               banco.deleteAll(screen['name']);

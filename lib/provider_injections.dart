@@ -1,36 +1,37 @@
-import 'package:jmobileflutter/app/layers/data/datasources/local/config_datasource.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/config_datasource_implementation.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/storage_datasource.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/storage_datasource_implementation.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/remote/remote_data_datasource.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/remote/remote_data_datasource_implementation.dart';
-import 'package:jmobileflutter/app/layers/data/repositories/config_repository_implementation.dart';
-import 'package:jmobileflutter/app/layers/data/repositories/data_repository_implementation.dart';
-import 'package:jmobileflutter/app/layers/data/repositories/storage_repository_implementation.dart';
-import 'package:jmobileflutter/app/layers/domain/repositories/config_repository.dart';
-import 'package:jmobileflutter/app/layers/domain/repositories/data_repository.dart';
-import 'package:jmobileflutter/app/layers/domain/repositories/storage_repository.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/auth/alter_password_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/config/load_addresses_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/config/load_company_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/config/load_config_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/config/load_last_logged_email.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/config/load_last_logged_password.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/config/save_addresses_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/config/save_company_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/config/save_config_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/config/save_last_logged_email.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/config/save_last_logged_password.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/config/version_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/data/datas_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/data/synchronous_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/storage/delete_data_to_send_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/storage/load_data_to_send_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/storage/save_data_to_send_usecase.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/config_provider.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/data_provider.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/pedido_provider.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/user_provider.dart';
+import 'package:connect_force_app/app/common/services/network_status_service.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/config_datasource.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/config_datasource_implementation.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/storage_datasource.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/storage_datasource_implementation.dart';
+import 'package:connect_force_app/app/layers/data/datasources/remote/remote_data_datasource.dart';
+import 'package:connect_force_app/app/layers/data/datasources/remote/remote_data_datasource_implementation.dart';
+import 'package:connect_force_app/app/layers/data/repositories/config_repository_implementation.dart';
+import 'package:connect_force_app/app/layers/data/repositories/data_repository_implementation.dart';
+import 'package:connect_force_app/app/layers/data/repositories/storage_repository_implementation.dart';
+import 'package:connect_force_app/app/layers/domain/repositories/config_repository.dart';
+import 'package:connect_force_app/app/layers/domain/repositories/data_repository.dart';
+import 'package:connect_force_app/app/layers/domain/repositories/storage_repository.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/auth/alter_password_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/config/load_addresses_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/config/load_company_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/config/load_config_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/config/load_last_logged_email.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/config/load_last_logged_password.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/config/save_addresses_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/config/save_company_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/config/save_config_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/config/save_last_logged_email.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/config/save_last_logged_password.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/config/version_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/data/datas_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/data/synchronous_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/storage/delete_data_to_send_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/storage/load_data_to_send_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/storage/save_data_to_send_usecase.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/config_provider.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/pedido_provider.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -54,6 +55,7 @@ List<SingleChildWidget> independentServices = [
   Provider<IConfigDatasource>(create: (context) => ConfigDatasourceImplementation()),
   Provider<IConfigRepository>(create: (context) => ConfigRepositoryImplementation(context.read())),
   Provider<IStorageDatasource>(create: (_) => StorageDatasourceImplementation()),
+  Provider<NetworkStatusService>(create: (_) => NetworkStatusService()),
 ];
 
 List<SingleChildWidget> dependentServices = [

@@ -35,6 +35,10 @@ String extractMonthAndYear(String fullDate) {
   return fullDate;
 }
 
+String formatCurrency(double? number) {
+  return NumberFormat.currency(locale: "pt_BR", symbol: "R\$").format(number ?? 0.00);
+}
+
 String formatter(DateTime? date) {
   if (date != null) {
     return DateFormat('dd/MM/yyyy').format(date);
@@ -308,4 +312,35 @@ Future<Map<String, dynamic>> buscarEnderecoPorCep(String cep) async {
   } else {
     throw Exception('Erro ao consultar o CEP. Status code: ${response.statusCode}');
   }
+}
+
+String formatJson(Map<String, dynamic> data) {
+  final buffer = StringBuffer('{');
+
+  data.forEach((key, value) {
+    if (key == 'entity' || key == 'in_insert' || key == 'new_id' || key == 'select') {
+      buffer.write('"$key": ${_formatValue(value)}, ');
+    } else {
+      buffer.write('$key: ${_formatValue(value)}, ');
+    }
+  });
+
+  if (buffer.length > 1) {
+    buffer.write('}');
+  }
+
+  return buffer.toString().replaceAll(', }', '}'); // Remove a última vírgula extra
+}
+
+String _formatValue(dynamic value) {
+  if (value is String) {
+    return '"$value"';
+  } else if (value is bool) {
+    return value ? '"true"' : '"false"';
+  } else if (value is List) {
+    return '[${value.map((e) => _formatValue(e)).join(', ')}]';
+  } else if (value is Map<String, dynamic>) {
+    return formatJson(value);
+  }
+  return value.toString();
 }

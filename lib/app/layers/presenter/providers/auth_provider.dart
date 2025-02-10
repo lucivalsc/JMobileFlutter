@@ -1,15 +1,15 @@
-import 'package:jmobileflutter/app/common/endpoints/endpoints.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/failure_screen.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/menu_principal_pagina.dart';
-import 'package:jmobileflutter/app/layers/presenter/not_logged_in/filiais_screen.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/data_provider.dart';
-import 'package:jmobileflutter/navigation.dart';
+import 'package:connect_force_app/app/common/endpoints/endpoints.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/failure_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/main_menu_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/not_logged_in/filiais_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
+import 'package:connect_force_app/navigation.dart';
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/auth/alter_password_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/auth/sign_in_usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/usecases/storage/save_data_to_send_usecase.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/config_provider.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/user_provider.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/auth/alter_password_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/auth/sign_in_usecase.dart';
+import 'package:connect_force_app/app/layers/domain/usecases/storage/save_data_to_send_usecase.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/config_provider.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/user_provider.dart';
 
 class AuthProvider extends ChangeNotifier {
   final SignInUsecase signInUsecase;
@@ -52,7 +52,7 @@ class AuthProvider extends ChangeNotifier {
         await _dataProvider.saveDataToSend(context, uri: 'login', payload: payload);
         await pushAndRemoveUntil(
           context,
-          const MenuPrincipalPagina(),
+          const MainMenuScreen(),
         );
       },
     );

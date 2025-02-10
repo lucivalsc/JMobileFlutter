@@ -1,9 +1,9 @@
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
-import 'package:jmobileflutter/app/common/widgets/elevated_button_widget.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/common/widgets/elevated_button_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/successful_screen.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/data_provider.dart';
-import 'package:jmobileflutter/navigation.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/successful_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
+import 'package:connect_force_app/navigation.dart';
 import 'package:provider/provider.dart';
 
 class SincronizarScreen extends StatefulWidget {
@@ -85,7 +85,7 @@ class _SincronizarScreenState extends State<SincronizarScreen> {
                     ? () {}
                     : () async {
                         setState(() => isSyncing = true);
-                        await dataProvider.synchronous(context);
+                        await dataProvider.synchronous(context, showMessage: false);
                         await dataProvider.synchronous(context, key: 'contas');
                         if (mounted) {
                           setState(() => isSyncing = false);

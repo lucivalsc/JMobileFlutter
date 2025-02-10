@@ -1,30 +1,29 @@
 import 'dart:async';
-import 'dart:convert';
-
-import 'package:geolocator/geolocator.dart';
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
-import 'package:jmobileflutter/app/common/widgets/app_widgets.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/banco_datasource_implementation.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/main_menu_list.dart';
-import 'package:jmobileflutter/app/layers/presenter/not_logged_in/login_screen.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/auth_provider.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/config_provider.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/data_provider.dart';
+import 'package:connect_force_app/app/common/services/network_status_service.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/common/widgets/app_widgets.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/main_menu_list.dart';
+import 'package:connect_force_app/app/layers/presenter/not_logged_in/login_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/auth_provider.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/config_provider.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/user_provider.dart';
-import 'package:jmobileflutter/navigation.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/user_provider.dart';
+import 'package:connect_force_app/functions.dart';
+import 'package:connect_force_app/navigation.dart';
 import 'package:provider/provider.dart';
 
-class MenuPrincipalPagina extends StatefulWidget {
-  const MenuPrincipalPagina({super.key});
+class MainMenuScreen extends StatefulWidget {
+  const MainMenuScreen({super.key});
 
   static const String route = "menu_principal_pagina";
 
   @override
-  State<MenuPrincipalPagina> createState() => _MenuPrincipalPaginaState();
+  State<MainMenuScreen> createState() => _MainMenuScreenState();
 }
 
-class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
+class _MainMenuScreenState extends State<MainMenuScreen> {
   Databasepadrao banco = Databasepadrao.instance;
   List listsMarket = [];
   final appStyles = AppStyles();
@@ -35,6 +34,8 @@ class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
   late DataProvider dataProvider;
   late Future<void> future;
   Map usuario = {};
+  bool isSending = false;
+  late NetworkStatusService _networkStatusService;
 
   // String _textAtualizado = '';
   String _enviadosText = '';
@@ -58,9 +59,9 @@ class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
 
     try {
       // Definir datas
-      final DateTime now = DateTime.now();
-      final DateTime inicioDia = DateTime(now.year, now.month, now.day, 0, 0, 1);
-      final DateTime fimDia = DateTime(now.year, now.month, now.day, 23, 59, 59);
+      // final DateTime now = DateTime.now();
+      // final DateTime inicioDia = DateTime(now.year, now.month, now.day, 0, 0, 1);
+      // final DateTime fimDia = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
       var resultNaoEnviado = await banco.dataReturnFull(sqlNaoEnviado);
       var resultNrVendas = await banco.dataReturnFull(sqlNrVendas);
@@ -116,13 +117,72 @@ class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
   void initState() {
     super.initState();
     future = initScreen();
+    _networkStatusService = Provider.of<NetworkStatusService>(context, listen: false)..enableService(true);
+
+    _networkStatusService.stream.listen((status) {
+      if (status == NetworkStatus.online) {
+        userProvider.checkIfUserHasSomethingToUpload().then((value) {
+          dataProvider.changeSendData(value);
+          print(dataProvider.isSendData);
+        });
+      } else {
+        if (userProvider.hasSomethingToUpload && !userProvider.hasWarnedSomethingToUpload) {
+          showFlushbar(
+            context,
+            "Dados A Enviar",
+            "Você possui dados locais que precisam ser enviados ao servidor. Esses dados serão enviados automaticamente quando uma conexão ativa à Internet for detectada.",
+            5,
+          );
+          userProvider.hasWarnedSomethingToUpload = true;
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     // Cancela o stream quando o widget for descartado
     dataProvider.positionStreamSubscription?.cancel();
+    // Cancela o monitoramento ao destruir o widget
+    _networkStatusService.enableService(false);
     super.dispose();
+  }
+
+  Future<void> sendData() async {
+    setState(() => isSending = true);
+    await dataProvider.enviarDados(
+      context,
+      tabela: 'MOBILE_CLIENTE',
+      campo: 'LAST_CHANGE',
+      route: 'MobileCliente',
+    );
+    await dataProvider.enviarDados(
+      context,
+      tabela: 'MOBILE_CONTATOS',
+      campo: 'LAST_CHANGE',
+      route: 'MobileContatos',
+    );
+    await dataProvider.enviarDados(
+      context,
+      tabela: 'MOBILE_PEDIDO',
+      campo: 'DATAMOBILE',
+      route: 'MobilePedido',
+    );
+    await dataProvider.enviarDados(
+      context,
+      tabela: 'MOBILE_ITEMPEDIDO',
+      campo: 'DATAHORAMOBILE',
+      route: 'MobileItemPedido',
+    );
+    // await dataProvider.enviarDados(
+    //   context,
+    //   tabela: 'MOBILE_PARCELAS',
+    //   campo: 'DATAHORAMOBILE',
+    //   route: 'MobileParcelas',
+    // );
+
+    // isSendData = false;
+    setState(() => isSending = false);
   }
 
   @override
@@ -142,6 +202,43 @@ class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
             title: const Text("Bem-vindo(a)!"),
             automaticallyImplyLeading: false,
             actions: [
+              if (!isSending)
+                ListenableBuilder(
+                  listenable: dataProvider,
+                  builder: (context, value) {
+                    return SizedBox(
+                      width: 50,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.cloud_upload,
+                          color: dataProvider.isSendData ? appStyles.secondaryColor2 : appStyles.secondaryColor3,
+                        ),
+                        onPressed: dataProvider.isSendData
+                            ? () async {
+                                await sendData();
+                                future = initScreen();
+                              }
+                            : null,
+                      ),
+                    );
+                  },
+                ),
+              if (isSending)
+                Row(
+                  children: [
+                    Center(
+                      child: SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black.withAlpha(170),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 22),
+                  ],
+                ),
               IconButton(
                 icon: const Icon(Icons.logout),
                 onPressed: () async {
@@ -243,6 +340,7 @@ class _MenuPrincipalPaginaState extends State<MenuPrincipalPagina> {
                   child: MainMenuList(
                     userProvider: userProvider,
                     provider: authProvider,
+                    onItemTapped: () => initScreen(),
                   ),
                 ),
               ],

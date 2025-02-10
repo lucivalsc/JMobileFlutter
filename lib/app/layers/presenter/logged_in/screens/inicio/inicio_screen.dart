@@ -1,6 +1,6 @@
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/relatorios/relatorios_vendas_screen.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/data_provider.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/screens/relatorios/relatorios_vendas_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

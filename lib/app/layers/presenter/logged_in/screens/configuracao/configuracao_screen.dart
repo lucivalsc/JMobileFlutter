@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:http/http.dart' as http;
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
-import 'package:jmobileflutter/app/common/widgets/elevated_button_widget.dart';
-import 'package:jmobileflutter/app/common/widgets/text_field_widget.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/common/widgets/elevated_button_widget.dart';
+import 'package:connect_force_app/app/common/widgets/text_field_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/data_provider.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -148,6 +148,19 @@ class _ConfiguracaoScreenState extends State<ConfiguracaoScreen> {
                   setState(() => isScreenLocked = true);
                   enviarBancoDados();
                   setState(() => isScreenLocked = false);
+                },
+              ),
+              const SizedBox(height: 10),
+              ElevatedButtonWidget(
+                label: 'LIMPAR BANCO',
+                onPressed: () async {
+                  // DM.Deletar('CLIENTES');
+                  // DM.Deletar('CONTAS');
+                  // DM.Deletar('MOBILE_CLIENTE');
+                  // DM.Deletar('MOBILE_CONTATOS');
+                  // DM.Deletar('MOBILE_ITEMPEDIDO');
+                  // DM.Deletar('MOBILE_PEDIDO');
+                  // DM.Deletar('PRODUTOS');
                 },
               ),
             ],

@@ -1,6 +1,6 @@
-import 'package:jmobileflutter/app/common/widgets/app_widgets.dart';
+import 'package:connect_force_app/app/common/widgets/app_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
 
 class SuccessfulScreen extends StatelessWidget {
   final String description;

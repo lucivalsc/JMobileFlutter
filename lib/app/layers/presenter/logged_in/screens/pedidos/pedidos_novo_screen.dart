@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
-import 'package:jmobileflutter/app/common/widgets/app_widgets.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/clientes/clientes_lista_screen.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/pedidos/pedidos_fechar_screen.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/produtos/produtos_lista_screen.dart';
-import 'package:jmobileflutter/navigation.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/common/widgets/app_widgets.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/screens/clientes/clientes_lista_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/screens/pedidos/pedidos_fechar_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/screens/produtos/produtos_lista_screen.dart';
+import 'package:connect_force_app/navigation.dart';
 
 class PedidosNovoScreen extends StatefulWidget {
   const PedidosNovoScreen({super.key});
@@ -16,7 +16,7 @@ class PedidosNovoScreen extends StatefulWidget {
 class _PedidosNovoScreenState extends State<PedidosNovoScreen> {
   AppWidgets appWidgets = AppWidgets();
   AppStyles appStyles = AppStyles();
-  Map cliente = {'NOMECLI': '', 'CPF': '', 'TELEFONE': ''};
+  Map cliente = {'NOMECLI': null, 'CPF': null, 'TELEFONE': ''};
   List<Map<String, dynamic>> listaProdutos = [];
 
   // Método para calcular o valor total
@@ -214,7 +214,7 @@ class _PedidosNovoScreenState extends State<PedidosNovoScreen> {
 
   // Método para validar antes de sair
   Future<bool> _onWillPop() async {
-    if (cliente['NOMECLI'].isNotEmpty || listaProdutos.isNotEmpty) {
+    if (cliente['NOMECLI'] != null || listaProdutos.isNotEmpty) {
       return await showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -266,34 +266,29 @@ class _PedidosNovoScreenState extends State<PedidosNovoScreen> {
                     Expanded(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Razão Social: ${cliente['NOMECLI']}',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'Razão Social: ${cliente['NOMECLI'] ?? 'Clique para adicionar cliente'}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Text(
-                                'CPF: ${cliente['CPF']}',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'CPF: ${cliente['CPF'] ?? 'Clique para adicionar cliente'}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.white,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(width: 10),
                     const Icon(Icons.search, color: Colors.white),
                   ],
                 ),
@@ -401,8 +396,32 @@ class _PedidosNovoScreenState extends State<PedidosNovoScreen> {
             FloatingActionButton.extended(
               heroTag: "btnProduto",
               label: const Text("Adicionar Produto"),
-              onPressed: cliente['NOMECLI'].isEmpty && listaProdutos.isEmpty
-                  ? null
+              onPressed: cliente['NOMECLI'] == null && listaProdutos.isEmpty
+                  ? () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Row(
+                            children: [
+                              Icon(
+                                Icons.warning,
+                                color: Colors.yellow,
+                                size: 60,
+                              ),
+                              const SizedBox(width: 10),
+                              Text("Selecione um cliente"),
+                            ],
+                          ),
+                          content: Text("Selecione um cliente antes de adicionar produtos."),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text("OK"),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   : () async {
                       var retorno = await push(context, ProdutosListaScreen(isFromPedido: true));
                       if (retorno == null) return;
@@ -413,13 +432,33 @@ class _PedidosNovoScreenState extends State<PedidosNovoScreen> {
             FloatingActionButton.extended(
               heroTag: "btnSalvar",
               label: const Text("Fechar Pedido"),
-              onPressed: cliente['NOMECLI'].isEmpty && listaProdutos.isEmpty
+              onPressed: cliente['NOMECLI'] == null && listaProdutos.isEmpty
                   ? null
-                  : () {
+                  : () async {
                       if (cliente['NOMECLI'].isEmpty || listaProdutos.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Selecione um cliente e adicione produtos antes de salvar."),
+                        await showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Row(
+                              children: [
+                                Icon(
+                                  Icons.warning,
+                                  color: Colors.yellow,
+                                  size: 60,
+                                ),
+                                const SizedBox(width: 10),
+                                Text("Atenção!"),
+                              ],
+                            ),
+                            content: Text("Selecione um cliente e adicione produtos antes de fechar o pedido."),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, false);
+                                },
+                                child: Text("OK"),
+                              ),
+                            ],
                           ),
                         );
                         return;
@@ -428,7 +467,7 @@ class _PedidosNovoScreenState extends State<PedidosNovoScreen> {
                       push(context, PedidosFecharScreen(cliente: cliente, listaProdutos: listaProdutos));
                     },
               backgroundColor:
-                  cliente['NOMECLI'].isEmpty && listaProdutos.isEmpty ? Colors.grey : appStyles.primaryColor,
+                  cliente['NOMECLI'] == null && listaProdutos.isEmpty ? Colors.grey : appStyles.primaryColor,
             ),
           ],
         ),

@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
-import 'package:jmobileflutter/app/common/models/exception_models.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/storage_datasource.dart';
+import 'package:connect_force_app/app/common/models/exception_models.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/storage_datasource.dart';
 
 class StorageDatasourceImplementation implements IStorageDatasource {
   @override

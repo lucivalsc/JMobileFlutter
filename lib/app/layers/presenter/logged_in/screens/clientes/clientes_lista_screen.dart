@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/banco_datasource_implementation.dart';
-import 'package:jmobileflutter/app/layers/data/models/debouncer_model.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/clientes/clientes_cadastro_screen.dart';
-import 'package:jmobileflutter/navigation.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
+import 'package:connect_force_app/app/layers/data/models/debouncer_model.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/screens/clientes/clientes_cadastro_screen.dart';
+import 'package:connect_force_app/navigation.dart';
 
 class ClientesListaScreen extends StatefulWidget {
   final bool? isFromPedido;
@@ -131,23 +131,23 @@ class _ClientesListaScreenState extends State<ClientesListaScreen> {
                               onPressed: () => Navigator.of(context).pop(),
                             ),
                             if (!widget.isFromPedido!) ...[
-                              TextButton(
-                                child: Text(
-                                  'Ver Detalhes',
-                                  style: TextStyle(
-                                    color: appStyles.primaryColor,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => ClientesCadastroScreen(cliente: item),
-                                    ),
-                                  );
-                                },
-                              ),
+                              // TextButton(
+                              //   child: Text(
+                              //     'Ver Detalhes',
+                              //     style: TextStyle(
+                              //       color: appStyles.primaryColor,
+                              //     ),
+                              //   ),
+                              //   onPressed: () {
+                              //     Navigator.of(context).pop();
+                              //     Navigator.push(
+                              //       context,
+                              //       MaterialPageRoute(
+                              //         builder: (_) => ClientesCadastroScreen(cliente: item),
+                              //       ),
+                              //     );
+                              //   },
+                              // ),
                               TextButton(
                                 child: Text(
                                   'Visualizar',

@@ -1,8 +1,8 @@
 
 import 'package:dartz/dartz.dart';
-import 'package:jmobileflutter/app/common/models/failure_models.dart';
-import 'package:jmobileflutter/app/common/usecase.dart';
-import 'package:jmobileflutter/app/layers/domain/repositories/config_repository.dart';
+import 'package:connect_force_app/app/common/models/failure_models.dart';
+import 'package:connect_force_app/app/common/usecase.dart';
+import 'package:connect_force_app/app/layers/domain/repositories/config_repository.dart';
 
 class LoadCompanyUsecase implements Usecase<NoParams, String> {
   final IConfigRepository repository;

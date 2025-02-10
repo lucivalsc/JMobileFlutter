@@ -1,8 +1,8 @@
-import 'package:jmobileflutter/app/common/models/exception_models.dart';
-import 'package:jmobileflutter/app/common/models/failure_models.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/storage_datasource.dart';
+import 'package:connect_force_app/app/common/models/exception_models.dart';
+import 'package:connect_force_app/app/common/models/failure_models.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/storage_datasource.dart';
 import 'package:dartz/dartz.dart';
-import 'package:jmobileflutter/app/layers/domain/repositories/storage_repository.dart';
+import 'package:connect_force_app/app/layers/domain/repositories/storage_repository.dart';
 
 class StorageRepositoryImplementation implements IStorageRepository {
   final IStorageDatasource datasource;

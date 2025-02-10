@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:jmobileflutter/app/common/script_sql.dart';
+import 'package:intl/intl.dart';
+import 'package:connect_force_app/app/common/script_sql.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -177,6 +178,25 @@ class Databasepadrao {
     return listMap.first;
   }
 
+  Future<List<Map>> consultarDadosDinamico(String tabela, String campo) async {
+    Database? dbPadrao = await db;
+    List<Map> dados = await dbPadrao!.query(
+      tabela,
+      where: '$campo IS NULL OR $campo = ""',
+    );
+    return dados;
+  }
+
+  Future<int> atualizarDadosDinamico(String tabela, String campo) async {
+    Database? dbPadrao = await db;
+    int dados = await dbPadrao!.update(
+      tabela,
+      {campo: DateTime.now().toString()},
+      where: '$campo IS NULL OR $campo = ""',
+    );
+    return dados;
+  }
+
   // Método para executar a consulta personalizada
   Future<List<Map>> listarPedidos() async {
     final db = await this.db;
@@ -348,7 +368,7 @@ class Databasepadrao {
             "CPF": cliente['CPF'],
             "IDENTIDADE": cliente['IDENTIDADE'],
             "PROFISSAO": cliente['PROFISSAO'],
-            "DATCAD": DateTime.now().toIso8601String(),
+            "DATCAD": DateFormat('yyyy-MM-dd').format(DateTime.now()),
             "LIMITECRED": cliente['LIMITECRED'],
             "CEP": cliente['CEP'],
             "ENDERECO": cliente['ENDERECO'],

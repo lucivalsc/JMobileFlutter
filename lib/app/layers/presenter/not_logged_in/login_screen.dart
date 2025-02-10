@@ -1,12 +1,10 @@
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
-import 'package:jmobileflutter/app/common/widgets/elevated_button_widget.dart';
-import 'package:jmobileflutter/app/common/widgets/text_field_widget.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/configuracao/configuracao_screen.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/auth_provider.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/config_provider.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/data_provider.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/common/widgets/elevated_button_widget.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/screens/configuracao/configuracao_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/auth_provider.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/config_provider.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/navigation.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,9 +15,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final appStyles = AppStyles();
   bool isScreenLocked = false;
-  bool password = true;
+  bool passwordVisible = true;
+  AppStyles appStyles = AppStyles();
 
   late AuthProvider authProvider;
   late ConfigProvider configProvider;
@@ -46,109 +44,173 @@ class _LoginScreenState extends State<LoginScreen> {
     future = initScreen();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final statusBarHeight = MediaQuery.of(context).padding.top;
-    return Stack(
-      children: [
-        Container(
-          constraints: const BoxConstraints.expand(),
-          padding: EdgeInsets.only(top: statusBarHeight),
-          decoration: BoxDecoration(
-            color: appStyles.colorWhite,
-          ),
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.2,
-                  ),
-                  Text(
-                    'JMobile',
-                    textAlign: TextAlign.center,
-                    style: appStyles.boldText,
-                  ),
-                  const SizedBox(height: 50),
-                  TextFieldWidget(
-                    label: 'Úsuario',
-                    icon: Icons.person,
-                    controller: userLogger,
-                  ),
-                  const SizedBox(height: 10),
-                  TextFieldWidget(
-                    label: 'Senha',
-                    icon: Icons.lock,
-                    controller: passwordLogger,
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 10),
-                  ElevatedButtonWidget(
-                    label: 'ENTRAR',
-                    onPressed: () async {
-                      setState(() => isScreenLocked = true);
-                      // Oculta o teclado se estiver ativo
-                      FocusManager.instance.primaryFocus?.unfocus();
-
-                      // Validate user and password
-                      if (validateUserAndPassword()) {
-                        await authProvider.signIn(
-                          context,
-                          mounted,
-                          userLogger.text,
-                          passwordLogger.text,
-                        );
-                      } else {
-                        // Display AlertDialog for invalid user/password
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text("Credenciais inválidas"),
-                              content: const Text("Insira usuário e senha válidos."),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text("OK"),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-                      setState(() => isScreenLocked = false);
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  TextButton(
-                    child: Text(
-                      'CONFIGURAÇÃO',
-                      style: appStyles.configCardTitleStyle,
-                    ),
-                    onPressed: () {
-                      push(context, ConfiguracaoScreen());
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  Text(configProvider.versionBuild),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+  bool validateUserAndPassword() {
+    return userLogger.text.isNotEmpty && passwordLogger.text.isNotEmpty;
   }
 
-  bool validateUserAndPassword() {
-    if (userLogger.text.isEmpty || passwordLogger.text.isEmpty) {
-      return false;
-    }
-    return true;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              appStyles.primaryColor,
+              Colors.teal.shade100,
+            ],
+          ),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 100),
+            const Text(
+              'Olá!',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 16),
+            const Text(
+              'Seja bem-vindo ao JMobile',
+              style: TextStyle(
+                fontSize: 22,
+                color: Colors.white70,
+              ),
+            ),
+            const SizedBox(height: 50),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(40),
+                    topRight: Radius.circular(40),
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Acessar',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: appStyles.primaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: userLogger,
+                        decoration: InputDecoration(
+                          labelText: 'Usuário',
+                          prefixIcon: const Icon(Icons.email),
+                          contentPadding: const EdgeInsets.all(14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: passwordLogger,
+                        obscureText: passwordVisible,
+                        decoration: InputDecoration(
+                          labelText: 'Senha',
+                          prefixIcon: const Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(passwordVisible ? Icons.visibility_off : Icons.visibility),
+                            onPressed: () {
+                              setState(() {
+                                passwordVisible = !passwordVisible;
+                              });
+                            },
+                          ),
+                          contentPadding: const EdgeInsets.all(14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButtonWidget(
+                          onPressed: () async {
+                            setState(() => isScreenLocked = true);
+                            FocusManager.instance.primaryFocus?.unfocus();
+
+                            if (validateUserAndPassword()) {
+                              await authProvider.signIn(
+                                context,
+                                mounted,
+                                userLogger.text,
+                                passwordLogger.text,
+                              );
+                            } else {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text("Credenciais inválidas"),
+                                    content: const Text("Insira usuário e senha válidos."),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text("OK"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                            setState(() => isScreenLocked = false);
+                          },
+                          label: 'ACESSAR',
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Center(
+                        child: TextButton(
+                          child: Text(
+                            'CONFIGURAÇÃO',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: appStyles.primaryColor,
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => ConfiguracaoScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Center(
+                        child: Text(
+                          configProvider.versionBuild,
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

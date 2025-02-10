@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/common/widgets/text_field_dropdown.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/conta_receber/item_data_recibo_widget.dart';
+import 'package:connect_force_app/app/common/widgets/text_field_dropdown.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/screens/conta_receber/item_data_recibo_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/banco_datasource_implementation.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/data_provider.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
 
 class ReciboScreen extends StatefulWidget {
   final Map cliente;

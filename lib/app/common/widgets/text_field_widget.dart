@@ -9,6 +9,7 @@ class TextFieldWidget extends StatelessWidget {
   final bool? obscureText;
   final int? maxLines;
   final double? height;
+  final TextInputType? keyboardType;
 
   const TextFieldWidget({
     super.key,
@@ -20,6 +21,7 @@ class TextFieldWidget extends StatelessWidget {
     this.obscureText = false,
     this.maxLines = 1,
     this.height = 45,
+    this.keyboardType = TextInputType.text,
   });
 
   @override
@@ -36,6 +38,7 @@ class TextFieldWidget extends StatelessWidget {
             onChanged: onChanged,
             obscureText: obscureText!,
             maxLines: maxLines,
+            keyboardType: keyboardType,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,

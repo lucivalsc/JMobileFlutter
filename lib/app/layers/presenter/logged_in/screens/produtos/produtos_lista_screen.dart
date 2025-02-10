@@ -1,9 +1,10 @@
+import 'package:connect_force_app/app/common/utils/functions.dart';
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
-import 'package:jmobileflutter/app/common/widgets/app_widgets.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/banco_datasource_implementation.dart';
-import 'package:jmobileflutter/app/layers/data/models/debouncer_model.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/produtos/produtos_visualizar_screen.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/common/widgets/app_widgets.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
+import 'package:connect_force_app/app/layers/data/models/debouncer_model.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/screens/produtos/produtos_visualizar_screen.dart';
 
 class ProdutosListaScreen extends StatefulWidget {
   final bool? isFromPedido;
@@ -25,6 +26,7 @@ class ProdutosListaScreenState extends State<ProdutosListaScreen> {
 
   Future<void> initScreen() async {
     listaProdutos = await banco.dataReturn("produtos");
+    print(listaProdutos.first);
     setState(() {
       listaFiltrada = List.from(listaProdutos);
       listaFiltrada.sort((a, b) => a["NOMEPROD"].toString().compareTo(b["NOMEPROD"].toString()));
@@ -292,7 +294,7 @@ class ProdutosListaScreenState extends State<ProdutosListaScreen> {
                     children: [Text("Código: ${item['CODIGO']}")],
                   ),
                   trailing: Text(
-                    "R\$ ${item['PRECO'].toStringAsFixed(2)}",
+                    formatCurrency(item['PRECO']),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: appStyles.primaryColor,

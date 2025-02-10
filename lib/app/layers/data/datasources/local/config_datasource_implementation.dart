@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
-import 'package:jmobileflutter/app/common/models/exception_models.dart';
-import 'package:jmobileflutter/app/common/utils/cryptography.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/config_datasource.dart';
+import 'package:connect_force_app/app/common/models/exception_models.dart';
+import 'package:connect_force_app/app/common/utils/cryptography.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/config_datasource.dart';
 // import 'package:package_info/package_info.dart';
 
 class ConfigDatasourceImplementation implements IConfigDatasource {

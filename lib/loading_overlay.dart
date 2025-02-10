@@ -1,4 +1,4 @@
-import 'package:jmobileflutter/loading_screen.dart';
+import 'package:connect_force_app/loading_screen.dart';
 import 'package:flutter/material.dart';
 
 class LoadingOverlay extends StatelessWidget {

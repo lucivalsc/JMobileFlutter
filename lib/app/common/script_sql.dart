@@ -1,3 +1,198 @@
+// class ScriptSql {
+//   static String createTableClientes = '''
+//                                         CREATE TABLE CLIENTES (
+//                                             NOMECARACTERISTICAPESSOA TEXT,
+//                                             CODCLI	TEXT,
+//                                             CODIGO	TEXT,
+//                                             CODEMPRESA	TEXT,
+//                                             NOMECLI	TEXT,
+//                                             ENDERECO	TEXT,
+//                                             BAIRRO	TEXT,
+//                                             CIDADE	TEXT,
+//                                             ESTADO	TEXT,
+//                                             CEP	TEXT,
+//                                             TELEFONE	TEXT,
+//                                             CPF	TEXT,
+//                                             LIMITECRED	TEXT,
+//                                             IDENTIDADE	TEXT,
+//                                             DATNASC	TEXT,
+//                                             FILIACAO	TEXT,
+//                                             PROFISSAO	TEXT,
+//                                             FOTO	TEXT,
+//                                             OBS	TEXT,
+//                                             CONJFANTASIA	TEXT,
+//                                             LAST_CHANGE	TEXT,
+//                                             ULTPAG	TEXT,
+//                                             NUMEROLOGRADOURO	TEXT,
+//                                             COMPLEMENTOLOGRADOURO    TEXT,
+//                                             DIAVENCIMENTO	TEXT,
+//                                             FLAGNAOVENDER	TEXT
+//                                         );
+// ''';
+
+//   static String createTableProdutos = '''
+//                                               CREATE TABLE PRODUTOS (
+//                                                   CODPROD     TEXT,
+//                                                   CODIGO      TEXT,
+//                                                   NOMEPROD    TEXT,
+//                                                   DATREAJ     TEXT,
+//                                                   ESTATU      TEXT,
+//                                                   PRECO	TEXT,
+//                                                   LAST_CHANGE TEXT
+//                                               );
+// ''';
+
+//   static String createTableContas = '''
+//                                         CREATE TABLE CONTAS (
+//                                             CODCLI	TEXT,
+//                                             NUMDOC	TEXT,
+//                                             DEVEDOR	TEXT,
+//                                             ENDERECO	TEXT,
+//                                             NUMEROLOGRADOURO TEXT,
+//                                             TELEFONE	TEXT,
+//                                             VALOR	TEXT,
+//                                             DATENTR	TEXT,
+//                                             DATVENC	TEXT,
+//                                             PARCELA	TEXT,
+//                                             FLAGPAGO	TEXT,
+//                                             DATPAG	TEXT,
+//                                             RECEBIDO	TEXT,
+//                                             CODCR	TEXT,
+//                                             SALDO	TEXT,
+//                                             DIAS_ATRASO      TEXT,
+//                                             PEDIDO	TEXT,
+//                                             CODIGO	TEXT,
+//                                             GUID	TEXT,
+//                                             TIPOPAGAMENTO    TEXT,
+//                                             LATITUDE	TEXT	DEFAULT (0),
+//                                             LONGITUDE	TEXT	DEFAULT (0),
+//                                             PDOT	TEXT,
+//                                             SEQ	INTEGER	PRIMARY KEY AUTOINCREMENT
+//                                         );
+// ''';
+
+//   static String createTableMobileCliente = '''
+//                                           CREATE TABLE MOBILE_CLIENTE (
+//                                               IDUSUARIO	TEXT,
+//                                               CODCLI	INTEGER	PRIMARY KEY AUTOINCREMENT,
+//                                               CODIGO	TEXT,
+//                                               NOMECLI	TEXT,
+//                                               ENDERECO	TEXT,
+//                                               BAIRRO	TEXT,
+//                                               CIDADE	TEXT,
+//                                               ESTADO	TEXT,
+//                                               CEP	TEXT,
+//                                               TELEFONE	TEXT,
+//                                               CPF	TEXT,
+//                                               LIMITECRED	TEXT,
+//                                               IDENTIDADE	TEXT,
+//                                               DATNASC	TEXT,
+//                                               FILIACAO	TEXT,
+//                                               PROFISSAO	TEXT,
+//                                               DATCAD	TEXT,
+//                                               FOTO	TEXT,
+//                                               OBS	TEXT,
+//                                               CONJFANTASIA	TEXT,
+//                                               LAST_CHANGE	TEXT,
+//                                               LATITUDE	TEXT	DEFAULT (0),
+//                                               LONGITUDE	TEXT	DEFAULT (0),
+//                                               PDOT	TEXT,
+//                                               NUMEROLOGRADOURO      TEXT,
+//                                               COMPLEMENTOLOGRADOURO TEXT,
+//                                               DIAVENCIMENTO	TEXT,
+//                                               FLAGNAOVENDER	TEXT
+//                                           );
+// ''';
+
+//   static String createTableMobileContatos = '''
+//                                           CREATE TABLE MOBILE_CONTATOS (
+//                                               IDUSUARIO   TEXT,
+//                                               CODCTC      TEXT,
+//                                               CODCLI      TEXT,
+//                                               NOME	TEXT,
+//                                               TELEFONE    TEXT,
+//                                               EMAIL	TEXT,
+//                                               SETOR	TEXT,
+//                                               LAST_CHANGE TEXT
+//                                           );
+// ''';
+
+//   static String createTableMobileItemPedido = '''
+//                                             CREATE TABLE MOBILE_ITEMPEDIDO (
+//                                                 IDITEMPEDIDO    INTEGER      PRIMARY KEY AUTOINCREMENT,
+//                                                 IDUSUARIO	TEXT,
+//                                                 IDITEMPEDIDOERP TEXT,
+//                                                 IDPEDIDO	TEXT,
+//                                                 IDPRODUTO	TEXT,
+//                                                 QTDE	TEXT,
+//                                                 VALORUNITARIO   TEXT,
+//                                                 VALORTOTAL      TEXT,
+//                                                 DATAHORAMOBILE  TEXT
+//                                             );
+// ''';
+
+//   static String createTableMobileParcelas = '''
+//                                               CREATE TABLE MOBILE_PARCELAS (
+//                                                   IDPARCELAS INTEGER	PRIMARY KEY AUTOINCREMENT,
+//                                                   DTINICIAL  TEXT,
+//                                                   GUID	TEXT,
+//                                                   DATA	TEXT,
+//                                                   VALORTOTAL TEXT,
+//                                                   PARCELA    TEXT,
+//                                                   NRPARCELA  TEXT,
+//                                                   VALOR      TEXT,
+//                                                   SITUACAO   TEXT	DEFAULT A,
+//                                                   CODCLI     TEXT,
+//                                                   DTPAGO     TEXT,
+//                                                   VALORPAGO  TEXT,
+//                                                   OBSERVACAO TEXT,
+//                                                   IDPEDIDO   TEXT
+//                                               );
+// ''';
+
+//   static String createTableMobilePedido = '''
+//                                               CREATE TABLE MOBILE_PEDIDO (
+//                                                   IDPEDIDO	INTEGER	PRIMARY KEY AUTOINCREMENT,
+//                                                   IDPEDIDOERP	TEXT,
+//                                                   IDEMPRESA	TEXT,
+//                                                   IDUSUARIO	TEXT,
+//                                                   IDCLIENTE	TEXT,
+//                                                   PRAZOPAGTO	TEXT,
+//                                                   DATAMOBILE	TEXT,
+//                                                   INICIO_VENCIMENTO TEXT,
+//                                                   OBSPEDIDO	TEXT,
+//                                                   VALOR	TEXT,
+//                                                   DESCONTO	TEXT,
+//                                                   VALORTOTAL	TEXT,
+//                                                   VALORENTRADA      TEXT,
+//                                                   STATUSPEDIDOERP   TEXT,
+//                                                   CLI_NOME	TEXT,
+//                                                   CLI_CPF	TEXT,
+//                                                   DATAHORA	TEXT,
+//                                                   CLIENTENOVO	TEXT,
+//                                                   COUNT_ITEMPEDIDO  TEXT,
+//                                                   TIPOPEDIDO	TEXT  DEFAULT P,
+//                                                   LATITUDE	TEXT	DEFAULT (0),
+//                                                   LONGITUDE	TEXT	DEFAULT (0)
+//                                               );
+// ''';
+
+//   static String createTableRelMobRecebida = '''
+//                                               CREATE TABLE REL_MOB_RECEBIDA (
+//                                                   CODIGO  TEXT,
+//                                                   NOMECLI TEXT,
+//                                                   NUMDOC  TEXT,
+//                                                   CODCR   TEXT,
+//                                                   CODUSER TEXT,
+//                                                   DATA    TEXT,
+//                                                   VALOR   TEXT,
+//                                                   TIPO    TEXT,
+//                                                   CODCLI  TEXT,
+//                                                   GUID    TEXT
+//                                               );
+// ''';
+// }
+
 class ScriptSql {
   static String createTableClientes = '''
                                         CREATE TABLE CLIENTES (

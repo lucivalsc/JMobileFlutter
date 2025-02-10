@@ -1,4 +1,4 @@
-import 'package:jmobileflutter/app/common/endpoints/endpoints.dart';
+import 'package:connect_force_app/app/common/endpoints/endpoints.dart';
 import '../../../../common/http/http_client.dart';
 import '../../../../common/models/exception_models.dart';
 import 'auth_datasource.dart';

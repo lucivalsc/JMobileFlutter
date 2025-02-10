@@ -1,5 +1,5 @@
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
-import 'package:jmobileflutter/navigation.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 
@@ -8,6 +8,7 @@ class BuildMainMenuButton extends StatelessWidget {
   final String? tela;
   final IconData? icon;
   final Function? funcao;
+  final Function() onItemTapped;
 
   const BuildMainMenuButton({
     super.key,
@@ -15,17 +16,19 @@ class BuildMainMenuButton extends StatelessWidget {
     required this.tela,
     required this.icon,
     this.funcao,
+    required this.onItemTapped,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
+      onTap: () async {
         if (tela != null) {
-          pushNamed(context, tela!);
+          await pushNamed(context, tela!);
         } else if (funcao != null) {
           funcao!();
         }
+        onItemTapped.call();
       },
       child: Card(
         shape: RoundedRectangleBorder(

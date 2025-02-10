@@ -1,7 +1,7 @@
-import 'package:jmobileflutter/app/common/models/exception_models.dart';
-import 'package:jmobileflutter/app/common/models/failure_models.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/config_datasource.dart';
-import 'package:jmobileflutter/app/layers/domain/repositories/config_repository.dart';
+import 'package:connect_force_app/app/common/models/exception_models.dart';
+import 'package:connect_force_app/app/common/models/failure_models.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/config_datasource.dart';
+import 'package:connect_force_app/app/layers/domain/repositories/config_repository.dart';
 import 'package:dartz/dartz.dart';
 
 class ConfigRepositoryImplementation implements IConfigRepository {

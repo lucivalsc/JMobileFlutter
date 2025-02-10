@@ -1,4 +1,4 @@
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatelessWidget {

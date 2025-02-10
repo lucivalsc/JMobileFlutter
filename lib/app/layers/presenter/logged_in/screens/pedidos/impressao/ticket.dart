@@ -1,5 +1,5 @@
-// import 'package:jmobileflutter/app/layers/data/datasources/local/banco_controller.dart';
-// import 'package:jmobileflutter/app/layers/presenter/screens/logged_in/view/comercial/pedidos/pedido_store.dart';
+// import 'package:connect_force_app/app/layers/data/datasources/local/banco_controller.dart';
+// import 'package:connect_force_app/app/layers/presenter/screens/logged_in/view/comercial/pedidos/pedido_store.dart';
 // import 'package:intl/intl.dart';
 // import 'imports.dart'; // Importe seus módulos necessários
 
@@ -48,7 +48,7 @@
 
 //   // Cabeçalho
 //   // bytes += generator.text(
-//   //   "APP jmobileflutter",
+//   //   "APP connect_force_app",
 //   //   styles: const PosStyles(align: PosAlign.center, height: PosTextSize.size2, width: PosTextSize.size2),
 //   //   linesAfter: 1,
 //   // );

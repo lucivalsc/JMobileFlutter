@@ -1,4 +1,4 @@
-// import 'package:jmobileflutter/app/layers/presenter/screens/logged_in/view/comercial/pedidos/pedido_store.dart';
+// import 'package:connect_force_app/app/layers/presenter/screens/logged_in/view/comercial/pedidos/pedido_store.dart';
 // import 'package:bluetooth_thermal_printer_plus/bluetooth_thermal_printer_plus.dart';
 
 // import 'imports.dart';

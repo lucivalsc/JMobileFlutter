@@ -1,8 +1,8 @@
-import 'package:jmobileflutter/app/layers/presenter/logged_in/menu_principal_pagina.dart';
-import 'package:jmobileflutter/app/layers/presenter/not_logged_in/login_screen.dart';
-import 'package:jmobileflutter/app/layers/presenter/not_logged_in/splash_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/main_menu_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/not_logged_in/login_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/not_logged_in/splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/config_provider.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/config_provider.dart';
 import 'package:provider/provider.dart';
 
 class Starter extends StatefulWidget {
@@ -25,7 +25,7 @@ class _StarterState extends State<Starter> {
     var passwordLogger = await configProvider.loadLastLoggedPassword();
 
     if (userLogger.isNotEmpty && passwordLogger.isNotEmpty) {
-      nextScreen = const MenuPrincipalPagina(); //MainMenuScreen
+      nextScreen = const MainMenuScreen(); //MainMenuScreen
     } else {
       nextScreen = const LoginScreen();
     }

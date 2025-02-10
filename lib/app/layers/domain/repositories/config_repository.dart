@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:jmobileflutter/app/common/models/failure_models.dart';
+import 'package:connect_force_app/app/common/models/failure_models.dart';
 
 abstract class IConfigRepository {
   Future<Either<Failure, Map<String, String>?>> loadAddresses();

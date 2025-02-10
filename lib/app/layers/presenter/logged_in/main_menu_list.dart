@@ -1,17 +1,19 @@
+import 'package:connect_force_app/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/common/widgets/app_widgets.dart';
+import 'package:connect_force_app/app/common/widgets/build_main_menu_button.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/auth_provider.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/common/styles/app_styles.dart';
-import 'package:jmobileflutter/app/common/widgets/app_widgets.dart';
-import 'package:jmobileflutter/app/common/widgets/build_main_menu_button.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/auth_provider.dart';
-import 'package:jmobileflutter/app/layers/presenter/providers/user_provider.dart';
 
 class MainMenuList extends StatefulWidget {
   final AuthProvider provider;
   final UserProvider userProvider;
+  final Function() onItemTapped;
   const MainMenuList({
     super.key,
     required this.provider,
     required this.userProvider,
+    required this.onItemTapped,
   });
 
   @override
@@ -89,6 +91,7 @@ class _MainMenuListState extends State<MainMenuList> {
                       title: listButtons[index]['title'],
                       tela: listButtons[index]['route'],
                       icon: listButtons[index]['icon'],
+                      onItemTapped: widget.onItemTapped,
                     );
                   },
                 ),

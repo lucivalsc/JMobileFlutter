@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:jmobileflutter/app/common/utils/functions.dart';
-import 'package:jmobileflutter/app/common/widgets/text_field_date.dart';
-import 'package:jmobileflutter/app/common/widgets/text_field_dropdown.dart';
-import 'package:jmobileflutter/app/common/widgets/text_field_widget.dart';
-import 'package:jmobileflutter/app/layers/data/datasources/local/banco_datasource_implementation.dart';
-import 'package:jmobileflutter/app/layers/presenter/logged_in/screens/pedidos/pedidos_lista_screen.dart';
+import 'package:intl/intl.dart';
+import 'package:connect_force_app/app/common/utils/functions.dart';
+import 'package:connect_force_app/app/common/widgets/text_field_date.dart';
+import 'package:connect_force_app/app/common/widgets/text_field_dropdown.dart';
+import 'package:connect_force_app/app/common/widgets/text_field_widget.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
+import 'package:provider/provider.dart';
 
 class PedidosFecharScreen extends StatefulWidget {
   final Map cliente;
@@ -23,16 +25,19 @@ class PedidosFecharScreen extends StatefulWidget {
 
 class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
   final Databasepadrao banco = Databasepadrao.instance;
+  late DataProvider dataProvider;
+  late Future<void> future;
   // Controladores
-  TextEditingController descontoContoller = TextEditingController();
-  TextEditingController valorEntradaContoller = TextEditingController();
-  TextEditingController inicioVencimentoContoller = TextEditingController();
-  TextEditingController numeroParcelasContoller = TextEditingController();
+  TextEditingController descontoContoller = TextEditingController(text: '0');
+  TextEditingController valorEntradaContoller = TextEditingController(text: '0');
+  TextEditingController inicioVencimentoContoller =
+      TextEditingController(text: DateFormat('dd/MM/yyyy').format(DateTime.now().add(Duration(days: 30))));
+  TextEditingController numeroParcelasContoller = TextEditingController(text: '1 parcela');
   TextEditingController observacaoContoller = TextEditingController();
   Map usuario = {};
   // Variáveis de estado
-  Map selectedTipoPedido = {};
-  Map selectedNumeroParcela = {};
+  Map selectedTipoPedido = {'id': 1, 'text': 'Pedido'};
+  Map selectedNumeroParcela = {'id': 1, 'text': '1 parcela'};
   List<Map<String, dynamic>> parcelas = [];
 
   // Listas de opções
@@ -72,7 +77,7 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
     parcelas.clear();
     double valorTotalComDesconto = getValorComDescontoEentrada();
     int numeroParcelas = selectedNumeroParcela['id'] ?? 1;
-    DateTime dataVencimento = DateTime.tryParse(inicioVencimentoContoller.text) ?? DateTime.now();
+    DateTime dataVencimento = formatarData(inicioVencimentoContoller.text);
 
     if (numeroParcelas > 0) {
       double valorParcela = valorTotalComDesconto / numeroParcelas;
@@ -123,31 +128,34 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
       // }
 
       // Verifica se o cliente é novo
-      final clienteNovo = await banco.cliente(widget.cliente['CODCLI']);
+      final clienteNovo = await banco.cliente(widget.cliente['CODCLI'].toString());
 
       // final isClienteNovo = clienteNovo.isNotEmpty ? '1' : '0';
       final isClienteNovo = clienteNovo != null ? '1' : '0';
 
       // Insere o pedido na tabela MOBILE_PEDIDO
-      final idPedido = await banco.dataInsertClient('MOBILE_PEDIDO', {
-        'IDEMPRESA': usuario['CODEMPRESA'],
-        'IDUSUARIO': usuario['CODIGO'],
-        'IDCLIENTE': widget.cliente['CODCLI'],
-        'PRAZOPAGTO': selectedNumeroParcela['id'].toString(),
-        'INICIO_VENCIMENTO': inicioVencimentoContoller.text,
-        'VALOR': double.tryParse(descontoContoller.text) ?? 0,
-        'DESCONTO': double.tryParse(descontoContoller.text) ?? 0,
-        'VALORTOTAL': getValorComDescontoEentrada(),
-        'VALORENTRADA': double.tryParse(valorEntradaContoller.text) ?? 0,
-        'CLI_NOME': widget.cliente['NOMECLI'],
-        'DATAHORA': DateTime.now().toString(),
-        'COUNT_ITEMPEDIDO': widget.listaProdutos.length,
-        'OBSPEDIDO': observacaoContoller.text,
-        'CLIENTENOVO': isClienteNovo,
-        'TIPOPEDIDO': selectedTipoPedido['id'] == 1 ? 'P' : 'C',
-        'LATITUDE': '',
-        'LONGITUDE': '',
-      });
+      final idPedido = await banco.dataInsertClient(
+        'MOBILE_PEDIDO',
+        {
+          'IDEMPRESA': usuario['CODEMPRESA'],
+          'IDUSUARIO': usuario['CODIGO'],
+          'IDCLIENTE': widget.cliente['CODCLI'],
+          'PRAZOPAGTO': selectedNumeroParcela['id'].toString(),
+          'INICIO_VENCIMENTO': DateFormat('yyyy-MM-dd').format(formatarData(inicioVencimentoContoller.text)),
+          'VALOR': double.tryParse(descontoContoller.text) ?? 0,
+          'DESCONTO': double.tryParse(descontoContoller.text) ?? 0,
+          'VALORTOTAL': getValorComDescontoEentrada(),
+          'VALORENTRADA': double.tryParse(valorEntradaContoller.text) ?? 0,
+          'CLI_NOME': widget.cliente['NOMECLI'],
+          'DATAHORA': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()), // Formata a data atual
+          'COUNT_ITEMPEDIDO': widget.listaProdutos.length,
+          'OBSPEDIDO': observacaoContoller.text.isNotEmpty ? observacaoContoller.text : ' ',
+          'CLIENTENOVO': isClienteNovo,
+          'TIPOPEDIDO': selectedTipoPedido['id'] == 1 ? 'P' : 'C',
+          'LATITUDE': dataProvider.latitudeController.text,
+          'LONGITUDE': dataProvider.longitudeController.text,
+        },
+      );
 
       // Insere os itens do pedido na tabela MOBILE_ITEMPEDIDO
       for (var produto in widget.listaProdutos) {
@@ -188,6 +196,7 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
               TextButton(
                 onPressed: () {
                   // Navega para a tela de lista de pedidos
+                  Navigator.of(context).pop();
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 },
@@ -232,9 +241,17 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
     });
   }
 
+  Future<void> initScreen() async {
+    dataProvider = Provider.of<DataProvider>(context, listen: false);
+    usuario = await dataProvider.loadDataToSend(uri: 'login');
+    gerarParcelas();
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
+    future = initScreen();
     // Adicionar listeners para atualizar as parcelas quando os campos mudarem
     // descontoContoller.addListener(() {
     //   formatarValor(descontoContoller);
@@ -306,6 +323,7 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
                       child: TextFieldWidget(
                         label: 'Desconto',
                         controller: descontoContoller,
+                        keyboardType: TextInputType.number,
                       ),
                     ),
                     const SizedBox(width: 5),
@@ -313,6 +331,7 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
                       child: TextFieldWidget(
                         label: 'Valor Entrada',
                         controller: valorEntradaContoller,
+                        keyboardType: TextInputType.number,
                       ),
                     ),
                   ],
@@ -333,6 +352,7 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
                         value: 'text',
                         id: 'id',
                         items: numeroParcela,
+                        initialValue: selectedNumeroParcela['id'].toString(),
                         onItemSelected: (selectedItem) {
                           setState(() {
                             selectedNumeroParcela = selectedItem;
@@ -352,6 +372,7 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
                         value: 'text',
                         id: 'id',
                         items: tipoPedido,
+                        initialValue: selectedTipoPedido['id'].toString(),
                         onItemSelected: (selectedItem) {
                           setState(() {
                             selectedTipoPedido = selectedItem;
