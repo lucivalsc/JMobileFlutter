@@ -51,11 +51,17 @@ dependencies:
   uuid: ^4.3.3
   connectivity_plus: ^5.0.2
   data_connection_checker_nulls: ^0.0.2
-  # blue_thermal_printer: ^1.2.3
-  # flutter_bluetooth_serial: ^0.4.0
-  # bluetooth_thermal_printer_plus: ^0.0.2
-  # esc_pos_utils: ^1.1.0
-  # flutter_blue_plus: ^1.32.1
+  cpf_cnpj_validator: ^2.0.0
+  brasil_fields: ^1.13.1
+  cached_network_image: ^3.2.3
+  easy_mask: ^2.0.1
+  email_validator: ^2.1.17
+  extended_masked_text: ^2.3.1
+  mask_text_input_formatter: ^2.9.0
+  esc_pos_utils: ^1.1.0
+  flutter_blue_plus: ^1.35.2
+  permission_handler: ^11.3.0
+  esc_pos_printer: ^4.1.0
 
 dependency_overrides:
   intl: ^0.19.0

@@ -1,4 +1,6 @@
+import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:connect_force_app/app/common/utils/functions.dart';
 import 'package:connect_force_app/app/common/widgets/text_field_date.dart';
@@ -324,6 +326,10 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
                         label: 'Desconto',
                         controller: descontoContoller,
                         keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          CentavosInputFormatter(casasDecimais: 2),
+                        ],
                       ),
                     ),
                     const SizedBox(width: 5),
@@ -332,6 +338,10 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
                         label: 'Valor Entrada',
                         controller: valorEntradaContoller,
                         keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          CentavosInputFormatter(casasDecimais: 2),
+                        ],
                       ),
                     ),
                   ],

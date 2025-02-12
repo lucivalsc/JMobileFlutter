@@ -4,6 +4,7 @@ import "package:connect_force_app/app/layers/presenter/logged_in/screens/configu
 import "package:connect_force_app/app/layers/presenter/logged_in/screens/pedidos/pedidos_lista_screen.dart";
 import "package:connect_force_app/app/layers/presenter/logged_in/screens/produtos/produtos_lista_screen.dart";
 import "package:connect_force_app/app/layers/presenter/logged_in/screens/conta_receber/conta_receber_lista_screen.dart";
+import "package:connect_force_app/app/layers/presenter/logged_in/screens/relatorios/relatorios_screen.dart";
 import "package:connect_force_app/app/layers/presenter/logged_in/screens/sincronizar/sincronizar_screen.dart";
 import "package:connect_force_app/starter.dart";
 import "package:flutter/material.dart";
@@ -34,6 +35,8 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
       return pageRouteBuilder(ProdutosListaScreen(isFromPedido: args?[0] ?? false));
     case ContaReceberListaScreen.route:
       return pageRouteBuilder(const ContaReceberListaScreen());
+    case RelatoriosScreen.route:
+      return pageRouteBuilder(const RelatoriosScreen());
   }
 
   return null;

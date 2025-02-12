@@ -197,6 +197,48 @@ class Databasepadrao {
     return dados;
   }
 
+  Future<List<Map>> imprimirPedido(String codigoPedido) async {
+    final db = await this.db;
+
+    var sql = '''
+                  SELECT 
+                      COALESCE(MP.CLI_NOME, C.NOMECLI) AS NOMECLIENTE,
+                      COALESCE(MP.IDCLIENTE, C.CODCLI) AS CODCLIENTE,
+                      COALESCE(C.CODIGO, MC.CODIGO) AS CODIGORELATORIO,
+                      MI.*, 
+                      C.*, 
+                      MP.VALORTOTAL AS VALORTOTALCALC,
+                      MP.INICIO_VENCIMENTO,
+                      MP.DATAHORA,
+                      MP.DATAMOBILE,
+                      MP.VALOR,
+                      MP.DESCONTO,
+                      MP.VALORENTRADA,
+                      MP.VALORTOTAL AS VALORTOTALVENDA,
+                      MP.TIPOPEDIDO,
+                      MP.PRAZOPAGTO,
+                      P.NOMEPROD,
+                      P.CODIGO AS CODIGOPRODUTO,
+                      (SELECT SUM(QTDE) 
+                      FROM MOBILE_ITEMPEDIDO 
+                      WHERE IDPEDIDO = MI.IDPEDIDO) AS TOTALPRODUTOS
+                  FROM 
+                      MOBILE_ITEMPEDIDO MI
+                  LEFT JOIN 
+                      MOBILE_PEDIDO MP ON MP.IDPEDIDO = MI.IDPEDIDO
+                  LEFT JOIN 
+                      CLIENTES C ON C.CODCLI = MP.IDCLIENTE
+                  LEFT JOIN 
+                      MOBILE_CLIENTE MC ON MC.CODCLI = MP.IDUSUARIO
+                  LEFT JOIN 
+                      PRODUTOS P ON P.CODPROD = MI.IDPRODUTO
+                  WHERE 
+                      MI.IDPEDIDO = $codigoPedido;
+    ''';
+
+    return await db!.rawQuery(sql);
+  }
+
   // Método para executar a consulta personalizada
   Future<List<Map>> listarPedidos() async {
     final db = await this.db;
@@ -413,6 +455,36 @@ class Databasepadrao {
     final result = await txn.rawQuery('SELECT MAX(CODCLI) AS CODIGO FROM MOBILE_CLIENTE');
     final maxCodigo = result.first['CODIGO'] as int? ?? 0;
     return (maxCodigo + 1).toString();
+  }
+
+  //RELATORIOS
+  Future<List<Map>> relatoriosRecebidas() async {
+    final db = await this.db;
+    const sql = '''SELECT * FROM REL_MOB_RECEBIDA ORDER BY DATA''';
+    return await db!.rawQuery(sql);
+  }
+
+  Future<List<Map>> relatoriosRecebidasFull() async {
+    final db = await this.db;
+    const sql = '''SELECT  
+                      SUM(CARTAO) AS CARTAO,  
+                      SUM(DINHEIRO) AS DINHEIRO,  
+                      SUM(PIX) AS PIX,  
+                      SUM(DEP) AS DEP,  
+                      (SELECT SUM(VALOR) FROM REL_MOB_RECEBIDA) AS TOTAL,  
+                      SUM(OUTROS) AS OUTROS,  
+                      COUNT(*) AS QTDE  
+                  FROM (  
+                      SELECT  
+                          CASE WHEN TIPO = 'Cartão' THEN VALOR ELSE 0 END AS CARTAO,  
+                          CASE WHEN TIPO = 'Dinheiro' THEN VALOR ELSE 0 END AS DINHEIRO,  
+                          CASE WHEN TIPO = 'Pix' THEN VALOR ELSE 0 END AS PIX,  
+                          CASE WHEN TIPO = 'Depósito' THEN VALOR ELSE 0 END AS DEP,  
+                          CASE WHEN TIPO = 'Outros' THEN VALOR ELSE 0 END AS OUTROS  
+                      FROM REL_MOB_RECEBIDA  
+                  );
+''';
+    return await db!.rawQuery(sql);
   }
 
   Future<int> dataInsertClient(String tabela, Map<String, dynamic> item) async {

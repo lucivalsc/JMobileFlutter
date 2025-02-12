@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:connect_force_app/app/layers/presenter/providers/user_provider.dart';
 import 'package:connect_force_app/functions.dart';
 import 'package:connect_force_app/navigation.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 class MainMenuScreen extends StatefulWidget {
@@ -110,6 +111,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     await dataProvider.getCurrentLocation(context);
     dataProvider.startListeningToLocationChanges(context); // Inicia o monitoramento da localização
     _atualizarDados();
+    // Verifica o status da localização
+    _checkLocationStatus();
     setState(() {});
   }
 
@@ -257,7 +260,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                         ),
                         SizedBox(width: 10),
                         TextButton(
-                          onPressed: () => pushAndRemoveUntil(context, LoginScreen()),
+                          onPressed: () {
+                            authProvider.signOut();
+                            pushAndRemoveUntil(context, LoginScreen());
+                          },
                           child: const Text(
                             "Sair",
                             style: TextStyle(color: Colors.black),
@@ -343,11 +349,65 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                     onItemTapped: () => initScreen(),
                   ),
                 ),
+                Text(
+                  isLocationEnabled == null
+                      ? "Verificando status da localização..."
+                      : isLocationEnabled!
+                          ? "Localização ativada ✅"
+                          : "Localização desativada ❌",
+                  style: TextStyle(fontSize: 18),
+                ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  late Stream<Position> positionStream;
+  bool? isLocationEnabled;
+
+  // Verifica e escuta mudanças no status da localização
+  void _checkLocationStatus() async {
+    bool enabled = await Geolocator.isLocationServiceEnabled();
+    _updateLocationStatus(enabled);
+
+    // Escuta mudanças na configuração da localização
+    Geolocator.getServiceStatusStream().listen((status) {
+      bool isEnabled = status == ServiceStatus.enabled;
+      if (isLocationEnabled != isEnabled) {
+        _updateLocationStatus(isEnabled);
+      }
+    });
+  }
+
+  // Atualiza o estado e limpa os campos se necessário
+  void _updateLocationStatus(bool isEnabled) {
+    setState(() => isLocationEnabled = isEnabled);
+    _showSnackBar(isEnabled);
+
+    if (!isEnabled) {
+      dataProvider.latitudeController.text = '';
+      dataProvider.longitudeController.text = '';
+    } else {
+      // Cancela o stream quando o widget for descartado
+      dataProvider.positionStreamSubscription?.cancel();
+      dataProvider.startListeningToLocationChanges(context);
+    }
+    setState(() {});
+  }
+
+  // Exibe a mensagem via SnackBar
+  void _showSnackBar(bool isEnabled) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isEnabled ? "Localização ativada ✅" : "Localização desativada ❌!",
+        ),
+        duration: Duration(seconds: 2),
+        backgroundColor: isEnabled ? Colors.green : Colors.red,
+      ),
     );
   }
 }

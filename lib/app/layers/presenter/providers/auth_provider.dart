@@ -28,6 +28,11 @@ class AuthProvider extends ChangeNotifier {
   void setConfigProvider(ConfigProvider provider) => _configProvider = provider;
   void setDataProvider(DataProvider provider) => _dataProvider = provider;
 
+  Future signOut() async {
+    await _configProvider.saveLastLoggedEmail('');
+    await _configProvider.saveLastLoggedPassword('');
+  }
+
   Future signIn(BuildContext context, bool mounted, email, password, {bool forceCheckin = false}) async {
     final result = await signInUsecase([email, password]);
 

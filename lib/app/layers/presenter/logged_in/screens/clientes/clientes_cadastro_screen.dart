@@ -1,4 +1,6 @@
+import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:connect_force_app/app/common/styles/app_styles.dart';
 import 'package:connect_force_app/app/common/utils/functions.dart';
@@ -280,6 +282,7 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
     String? Function(String?)? customValidator,
     Function(String)? onChanged,
     TextInputType? keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextFormField(
       controller: controller,
@@ -297,6 +300,7 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
             }
           : customValidator,
       onChanged: onChanged,
+      inputFormatters: inputFormatters ?? [],
       keyboardType: keyboardType,
     );
   }
@@ -402,7 +406,7 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
                           _buildTextField(label: 'Código do Usuário', controller: _codigoController),
                         _buildTextField(label: 'Nome do Cliente', controller: _nomeController, isRequired: true),
                         // _buildTextField(label: 'Código do Cliente', controller: _codigoController, isRequired: true),
-                        _buildTextFieldDate(
+                        _buildTextField(
                           label: 'Data de Nascimento',
                           controller: _dataNascController,
                           isRequired: true,
@@ -412,21 +416,36 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
                             }
                             return null;
                           },
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            DataInputFormatter(),
+                          ],
                         ),
                         _buildTextField(
-                            label: 'Telefone',
-                            controller: _telefoneController,
-                            isRequired: true,
-                            keyboardType: TextInputType.phone),
+                          label: 'Telefone',
+                          controller: _telefoneController,
+                          isRequired: true,
+                          keyboardType: TextInputType.phone,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            TelefoneInputFormatter(),
+                          ],
+                        ),
                         _buildTextField(label: 'Profissão', controller: _profissaoController),
                         _buildTextField(
                             label: 'Dia Vencimento',
                             controller: _diaVencimentoController,
                             keyboardType: TextInputType.number),
                         _buildTextField(
-                            label: 'Limite de Crédito',
-                            controller: _limiteCreditoController,
-                            keyboardType: TextInputType.numberWithOptions(decimal: true)),
+                          label: 'Limite de Crédito',
+                          controller: _limiteCreditoController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            CentavosInputFormatter(casasDecimais: 2),
+                          ],
+                        ),
 
                         if (usuarioView != null) ...[
                           _buildTextField(label: 'Última venda', controller: _ultVendController),
@@ -468,7 +487,11 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
                           }
                           return null;
                         },
-                        keyboardType: TextInputType.numberWithOptions(decimal: false),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          CpfInputFormatter(),
+                        ],
                       ),
                       _buildTextField(
                         label: 'Identidade',
@@ -492,8 +515,9 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
                         onChanged: (p0) async {
                           try {
                             // Consulta o endereço pelo CEP
-                            if (p0.toString().length <= 7) return;
-                            Map<String, dynamic> endereco = await buscarEnderecoPorCep(p0);
+                            if (p0.toString().length <= 9) return;
+                            Map<String, dynamic> endereco =
+                                await buscarEnderecoPorCep(p0.replaceAll('.', '').replaceAll('-', ''));
 
                             // Preenche os controladores com os dados retornados
                             _enderecoController.text = endereco['logradouro'] ?? '';
@@ -509,6 +533,10 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
                           }
                         },
                         keyboardType: TextInputType.numberWithOptions(decimal: false),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          CepInputFormatter(),
+                        ],
                       ),
                       _buildTextField(label: 'Endereço', controller: _enderecoController, isRequired: true),
                       _buildTextField(
@@ -534,6 +562,10 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
                         label: 'Telefone do Cônjuge',
                         controller: _telefoneConjugeController,
                         keyboardType: TextInputType.phone,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          TelefoneInputFormatter(),
+                        ],
                       ),
                     ],
                   ),
@@ -548,12 +580,20 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
                         label: 'Telefone da Mãe',
                         controller: _telefoneMaeController,
                         keyboardType: TextInputType.phone,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          TelefoneInputFormatter(),
+                        ],
                       ),
                       _buildTextField(label: 'Nome do Pai', controller: _filiacaoPaiController),
                       _buildTextField(
                         label: 'Telefone do Pai',
                         controller: _telefonePaiController,
                         keyboardType: TextInputType.phone,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          TelefoneInputFormatter(),
+                        ],
                       ),
                       _buildTextField(label: 'Observações', controller: _obsController),
                     ],

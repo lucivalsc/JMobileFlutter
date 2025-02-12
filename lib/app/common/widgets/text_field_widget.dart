@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class TextFieldWidget extends StatelessWidget {
   final String label;
@@ -10,6 +11,7 @@ class TextFieldWidget extends StatelessWidget {
   final int? maxLines;
   final double? height;
   final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   const TextFieldWidget({
     super.key,
@@ -22,6 +24,7 @@ class TextFieldWidget extends StatelessWidget {
     this.maxLines = 1,
     this.height = 45,
     this.keyboardType = TextInputType.text,
+    this.inputFormatters,
   });
 
   @override
@@ -39,6 +42,7 @@ class TextFieldWidget extends StatelessWidget {
             obscureText: obscureText!,
             maxLines: maxLines,
             keyboardType: keyboardType,
+            inputFormatters: inputFormatters ?? [],
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,

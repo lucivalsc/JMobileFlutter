@@ -1,3 +1,4 @@
+import 'package:connect_force_app/app/layers/presenter/logged_in/screens/pedidos/pedidos_impressao_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:connect_force_app/app/common/styles/app_styles.dart';
 import 'package:connect_force_app/app/common/utils/functions.dart';
@@ -117,7 +118,7 @@ class _PedidosListaScreenState extends State<PedidosListaScreen> {
                   onPressed: () {
                     // Função para impressão
                     Navigator.pop(context);
-                    // push(context, PedidosImpressaoScreen());
+                    push(context, PedidosImpressaoScreen(pedido: pedido));
                   },
                   style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
                   child: const Text("Imprimir"),
@@ -283,6 +284,26 @@ class _PedidosListaScreenState extends State<PedidosListaScreen> {
                             color: Colors.grey,
                           ),
                         ),
+                        Row(
+                          children: [
+                            Container(
+                              alignment: Alignment.centerLeft,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: pedido['DATAMOBILE'] == null ? Colors.red : Colors.green,
+                              ),
+                              padding: const EdgeInsets.all(5),
+                              margin: const EdgeInsets.only(top: 5),
+                              child: Text(
+                                pedido['DATAMOBILE'] == null ? 'Não sincronizado' : 'Sincronizado',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
                       ],
                     ),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
