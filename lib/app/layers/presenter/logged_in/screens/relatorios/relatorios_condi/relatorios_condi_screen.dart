@@ -125,11 +125,11 @@ class RelatoriosCondiScreenState extends State<RelatoriosCondiScreen> {
 
     // Cabeçalho
     bytes += generator.text(
-      "RELATÓRIO ${widget.tipoPedido == 'C' ? 'CONDI' : 'VENDAS MOBILE'}",
+      "RELATORIO ${widget.tipoPedido == 'C' ? 'CONDI' : 'VENDAS MOBILE'}",
       styles: PosStyles(align: PosAlign.center, bold: true),
     );
     bytes += generator.text("VENDEDOR: ${usuario['NOME'] ?? 'N/A'}");
-    bytes += generator.text("PERÍODO: ${widget.periodoInicial} - ${widget.periodoFinal}");
+    bytes += generator.text("PERIODO: ${widget.periodoInicial} - ${widget.periodoFinal}");
     bytes += generator.feed(1);
 
     // Lista de recibos
@@ -154,7 +154,7 @@ class RelatoriosCondiScreenState extends State<RelatoriosCondiScreen> {
       bytes += generator.text("TOTAL ENTRADA: R\$ ${entrada.toStringAsFixed(2)}");
     }
     bytes += generator.feed(2);
-    bytes += generator.text("VISTO GERÊNCIA", styles: PosStyles(align: PosAlign.center));
+    bytes += generator.text("VISTO GERENCIA", styles: PosStyles(align: PosAlign.center));
     bytes += generator.cut();
 
     // Dividir os dados em pacotes menores

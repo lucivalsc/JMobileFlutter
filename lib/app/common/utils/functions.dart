@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -35,8 +36,8 @@ String extractMonthAndYear(String fullDate) {
   return fullDate;
 }
 
-String formatCurrency(double? number) {
-  return NumberFormat.currency(locale: "pt_BR", symbol: "R\$").format(number ?? 0.00);
+String formatCurrency(double? number, {String? symbol = 'R\$'}) {
+  return NumberFormat.currency(locale: "pt_BR", symbol: symbol).format(number ?? 0.00);
 }
 
 String formatter(DateTime? date) {

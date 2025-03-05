@@ -24,7 +24,7 @@ class RelatoriosScreenState extends State<RelatoriosScreen> {
         children: [
           ListTile(
             title: const Text('Relatório recebidas'),
-            subtitle: const Text('Relatório de vendas por condicionador'),
+            subtitle: const Text('Relatório de vendas recebidas'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               showDialogDate(
@@ -42,8 +42,8 @@ class RelatoriosScreenState extends State<RelatoriosScreen> {
             },
           ),
           ListTile(
-            title: const Text('Relatório Condi'),
-            subtitle: const Text('Relatório de vendas por condicionador'),
+            title: const Text('Relatório Condicional'),
+            subtitle: const Text('Relatório de vendas condicionais'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               showDialogDate(
@@ -62,8 +62,8 @@ class RelatoriosScreenState extends State<RelatoriosScreen> {
             },
           ),
           ListTile(
-            title: const Text('Relatório vendas'),
-            subtitle: const Text('Relatório de vendas por condicionador'),
+            title: const Text('Relatório de vendas'),
+            subtitle: const Text('Relatório de vendas'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               showDialogDate(

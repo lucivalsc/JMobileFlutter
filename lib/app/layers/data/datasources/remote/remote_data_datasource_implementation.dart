@@ -2,14 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:archive/archive_io.dart';
+import 'package:connect_force_app/app/common/endpoints/endpoints.dart';
 import 'package:connect_force_app/app/common/http/http_client.dart';
 import 'package:connect_force_app/app/common/models/exception_models.dart';
 import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
 import 'package:connect_force_app/app/layers/data/datasources/remote/remote_data_datasource.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:connect_force_app/app/common/endpoints/endpoints.dart';
 
 class RemoteDataDatasourceImplementation implements IRemoteDataDatasource {
   final Map<String, String> headers = {"Content-Type": "application/json"};
@@ -45,11 +46,7 @@ class RemoteDataDatasourceImplementation implements IRemoteDataDatasource {
     final payLoad = Map<String, dynamic>.from(objects[2] as Map<String, dynamic>);
     final Endpoints endpoints = Endpoints();
     await endpoints.basicAuth();
-    // print(parseNestedJson(payLoad['value']));
-    // payLoad['value']['select'] = jsonDecode(((payLoad['value'])['select'] as List)[0] as String);
-    print(payLoad);
     final baseUrl = 'http://${endpoints.host}:${endpoints.porta}/$route';
-    // print(baseUrl);
     try {
       HttpResponse response;
       if (method == 'GET') {
@@ -223,11 +220,11 @@ class RemoteDataDatasourceImplementation implements IRemoteDataDatasource {
             if (screen['data'].isNotEmpty) {
               banco.deleteAll(screen['name']);
               if (screen['name'] == 'clientes') {
-                banco.dataInsert('CLIENTES', screen['data']);
+                banco.dataInsertLista('CLIENTES', screen['data']);
               } else if (screen['name'] == 'produtos') {
-                banco.dataInsert('PRODUTOS', screen['data']);
+                banco.dataInsertLista('PRODUTOS', screen['data']);
               } else {
-                banco.dataInsert(screen['name'], screen['data']);
+                banco.dataInsertLista(screen['name'], screen['data']);
               }
             }
           }

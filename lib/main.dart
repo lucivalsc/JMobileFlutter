@@ -1,16 +1,57 @@
+import 'package:connect_force_app/app/common/utils/functions.dart';
 import 'package:connect_force_app/on_generate_route.dart';
+import 'package:connect_force_app/provider_injections.dart';
 import 'package:connect_force_app/starter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import "package:flutter_localizations/flutter_localizations.dart";
-import 'package:connect_force_app/app/common/utils/functions.dart';
-import 'package:connect_force_app/provider_injections.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'app/common/styles/app_styles.dart';
 
+/// Widget global para capturar erros
+class CustomErrorWidget extends StatelessWidget {
+  final String errorMessage;
+
+  const CustomErrorWidget({super.key, required this.errorMessage});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Erro')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'Ocorreu um erro inesperado:\n$errorMessage',
+            style: const TextStyle(color: Colors.red, fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // // Captura erros na árvore de widgets (exibe um widget de erro)
+  // ErrorWidget.builder = (FlutterErrorDetails details) {
+  //   return CustomErrorWidget(errorMessage: details.exceptionAsString());
+  // };
+
+  // // Captura erros síncronos e os exibe corretamente
+  // FlutterError.onError = (FlutterErrorDetails details) {
+  //   FlutterError.dumpErrorToConsole(details);
+  //   showErrorScreen(details);
+  // };
+
+  // // Captura erros assíncronos (exemplo: erro dentro de um Future)
+  // PlatformDispatcher.instance.onError = (error, stack) {
+  //   showErrorScreen(FlutterErrorDetails(exception: error, stack: stack));
+  //   return true; // Indica que o erro foi tratado
+  // };
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
@@ -26,7 +67,15 @@ Future<void> main() async {
   );
 
   await startHiveStuff();
+
   runApp(const MainApp());
+}
+
+/// Exibe a tela de erro independentemente do estado do app
+void showErrorScreen(FlutterErrorDetails details) {
+  runApp(MaterialApp(
+    home: CustomErrorWidget(errorMessage: details.exceptionAsString()),
+  ));
 }
 
 class MainApp extends StatelessWidget {
@@ -80,8 +129,6 @@ class MainApp extends StatelessWidget {
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
               textStyle: const TextStyle(color: Colors.black),
-                // backgroundColor: appStyles.primaryColor,
-              //   foregroundColor: appStyles.colorWhite,
             ),
           ),
           floatingActionButtonTheme: FloatingActionButtonThemeData(

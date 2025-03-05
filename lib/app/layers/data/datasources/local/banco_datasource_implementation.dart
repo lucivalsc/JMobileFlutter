@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:intl/intl.dart';
+
 import 'package:connect_force_app/app/common/script_sql.dart';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 const String databaseName = 'bd';
@@ -51,6 +52,11 @@ class Databasepadrao {
     }
   }
 
+  Future<int> dataInsert(String tabela, Map<String, Object?> value) async {
+    Database? dbPadrao = await db;
+    return dbPadrao!.insert(tabela, value);
+  }
+
   Future<void> dataInsertMap(String tabela, List lista) async {
     Database? dbPadrao = await db;
     final batch = dbPadrao!.batch();
@@ -61,7 +67,7 @@ class Databasepadrao {
     await batch.commit();
   }
 
-  Future<void> dataInsert(String tabela, List lista) async {
+  Future<void> dataInsertLista(String tabela, List lista) async {
     Database? dbPadrao = await db;
     final batch = dbPadrao!.batch();
     for (var item in lista) {
@@ -249,6 +255,27 @@ class Databasepadrao {
       FROM MOBILE_PEDIDO MP
       LEFT JOIN CLIENTES C ON C.CODCLI = MP.IDCLIENTE
       ORDER BY MP.IDPEDIDO DESC
+    ''';
+
+    return await db!.rawQuery(sql);
+  }
+
+  Future<List<Map>> listarPedidosProdutos(int idPedido) async {
+    final db = await this.db;
+    var sql = '''
+                  SELECT 
+                    p.CODPROD,
+                    p.CODIGO,
+                    p.NOMEPROD,
+                    p.DATREAJ,
+                    p.ESTATU,
+                    p.PRECO,
+                    p.LAST_CHANGE,
+                    mi.QTDE as QUANTIDADE,
+                    mi.VALORTOTAL as VALOR_TOTAL 
+                  FROM MOBILE_ITEMPEDIDO mi 
+                  LEFT JOIN PRODUTOS p on mi.IDPRODUTO = p.CODPROD 
+                  WHERE mi.IDPEDIDO = $idPedido
     ''';
 
     return await db!.rawQuery(sql);

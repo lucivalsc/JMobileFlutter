@@ -1,9 +1,8 @@
 import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
 import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
+import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:esc_pos_utils/esc_pos_utils.dart';
-import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -61,7 +60,7 @@ class RelatoriosRecebidasScreenState extends State<RelatoriosRecebidasScreen> {
       route: 'RecebimentoMobile?CodUser=002&DtInicial=01/01/2000&DtFinal=01/02/2025',
     );
     await banco.deleteAll('REL_MOB_RECEBIDA');
-    await banco.dataInsert('REL_MOB_RECEBIDA', (value as List)[0]);
+    await banco.dataInsertLista('REL_MOB_RECEBIDA', (value as List)[0]);
     print(value);
 
     final dadosRecibos = await banco.relatoriosRecebidas();
@@ -124,15 +123,15 @@ class RelatoriosRecebidasScreenState extends State<RelatoriosRecebidasScreen> {
     List<int> bytes = [];
 
     // Cabeçalho
-    bytes += generator.text('Relatório de Recibos', styles: PosStyles(align: PosAlign.center, bold: true));
-    bytes += generator.text('Período: ${widget.periodoInicial} - ${widget.periodoFinal}');
-    bytes += generator.text('Usuário: ${usuario['NOME']}');
+    bytes += generator.text('Relatorio de Recibos', styles: PosStyles(align: PosAlign.center, bold: true));
+    bytes += generator.text('Periodo: ${widget.periodoInicial} - ${widget.periodoFinal}');
+    bytes += generator.text('Usuario: ${usuario['NOME']}');
     bytes += generator.text('--- CLIENTES RECEBIDOS ---', styles: PosStyles(align: PosAlign.center));
     bytes += generator.feed(1);
 
     // Lista de recibos
     for (var recibo in recibos) {
-      bytes += generator.text('Código: ${recibo["CODIGO"]}');
+      bytes += generator.text('Codigo: ${recibo["CODIGO"]}');
       bytes += generator.text('Cliente: ${recibo["NOMECLI"]}');
       bytes += generator.text('Doc: ${recibo["NUMDOC"]} - Tipo: ${recibo["TIPO"]} - Valor: R\$ ${recibo["VALOR"]}');
       bytes += generator.feed(1);
@@ -143,12 +142,12 @@ class RelatoriosRecebidasScreenState extends State<RelatoriosRecebidasScreen> {
     bytes += generator.text('Qtde Recebimentos: ${totais["QTDE"] ?? 0}');
     bytes += generator.text('Total Dinheiro: R\$ ${totais["DINHEIRO"]?.toStringAsFixed(2) ?? '0.00'}');
     bytes += generator.text('Total PIX: R\$ ${totais["PIX"]?.toStringAsFixed(2) ?? '0.00'}');
-    bytes += generator.text('Total Cartão: R\$ ${totais["CARTAO"]?.toStringAsFixed(2) ?? '0.00'}');
-    bytes += generator.text('Total Depósito: R\$ ${totais["DEP"]?.toStringAsFixed(2) ?? '0.00'}');
+    bytes += generator.text('Total Cartao: R\$ ${totais["CARTAO"]?.toStringAsFixed(2) ?? '0.00'}');
+    bytes += generator.text('Total Deposito: R\$ ${totais["DEP"]?.toStringAsFixed(2) ?? '0.00'}');
     bytes += generator.text('Total Outros: R\$ ${totais["OUTROS"]?.toStringAsFixed(2) ?? '0.00'}');
     bytes += generator.text('Total Geral: R\$ ${totais["TOTAL"]?.toStringAsFixed(2) ?? '0.00'}');
     bytes += generator.feed(2);
-    bytes += generator.text('Visto Gerência', styles: PosStyles(align: PosAlign.center));
+    bytes += generator.text('Visto Gerencia', styles: PosStyles(align: PosAlign.center));
     bytes += generator.cut();
 
     // Dividir os dados em pacotes menores

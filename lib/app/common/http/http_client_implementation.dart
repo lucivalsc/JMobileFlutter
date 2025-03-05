@@ -1,11 +1,13 @@
 import "dart:async";
 import "dart:convert";
-import "package:http/http.dart";
+import 'dart:io';
+
 import "package:http/http.dart" as http;
+import "package:http/http.dart";
+import 'package:http/io_client.dart';
+
 import "../models/exception_models.dart";
 import "http_client.dart";
-import 'dart:io';
-import 'package:http/io_client.dart';
 
 class TrustAllCertificates {
   static http.Client sslClient() {

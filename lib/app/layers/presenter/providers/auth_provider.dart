@@ -1,13 +1,14 @@
-import 'package:connect_force_app/app/layers/presenter/logged_in/failure_screen.dart';
-import 'package:connect_force_app/app/layers/presenter/logged_in/main_menu_screen.dart';
-import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
-import 'package:connect_force_app/navigation.dart';
-import 'package:flutter/material.dart';
 import 'package:connect_force_app/app/layers/domain/usecases/auth/alter_password_usecase.dart';
 import 'package:connect_force_app/app/layers/domain/usecases/auth/sign_in_usecase.dart';
 import 'package:connect_force_app/app/layers/domain/usecases/storage/save_data_to_send_usecase.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/failure_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/main_menu_screen.dart';
 import 'package:connect_force_app/app/layers/presenter/providers/config_provider.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
 import 'package:connect_force_app/app/layers/presenter/providers/user_provider.dart';
+import 'package:connect_force_app/navigation.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class AuthProvider extends ChangeNotifier {
   final SignInUsecase signInUsecase;
@@ -28,9 +29,16 @@ class AuthProvider extends ChangeNotifier {
   void setConfigProvider(ConfigProvider provider) => _configProvider = provider;
   void setDataProvider(DataProvider provider) => _dataProvider = provider;
 
+  //  No Flutter, você pode verificar se o aplicativo está em modo Debug ou Release
+  //  usando a constante kDebugMode, kReleaseMode, ou kProfileMode, que são fornecidas pelo pacote
+  //  flutter/foundation.dart. Essas constantes são booleanas e indicam o modo atual
+  //  em que o aplicativo está sendo executado.
   Future signOut() async {
-    await _configProvider.saveLastLoggedEmail('');
-    await _configProvider.saveLastLoggedPassword('');
+    //Se for debug, limpa as credenciais
+    if (kReleaseMode) {
+      await _configProvider.saveLastLoggedEmail('');
+      await _configProvider.saveLastLoggedPassword('');
+    }
   }
 
   Future signIn(BuildContext context, bool mounted, email, password, {bool forceCheckin = false}) async {

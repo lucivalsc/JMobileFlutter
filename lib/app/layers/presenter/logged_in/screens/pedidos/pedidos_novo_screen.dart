@@ -1,23 +1,46 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+
 import 'package:connect_force_app/app/common/styles/app_styles.dart';
 import 'package:connect_force_app/app/common/widgets/app_widgets.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
 import 'package:connect_force_app/app/layers/presenter/logged_in/screens/clientes/clientes_lista_screen.dart';
 import 'package:connect_force_app/app/layers/presenter/logged_in/screens/pedidos/pedidos_fechar_screen.dart';
 import 'package:connect_force_app/app/layers/presenter/logged_in/screens/produtos/produtos_lista_screen.dart';
 import 'package:connect_force_app/navigation.dart';
+import 'package:flutter/material.dart';
 
 class PedidosNovoScreen extends StatefulWidget {
-  const PedidosNovoScreen({super.key});
+  final Map? pedido;
+  const PedidosNovoScreen({super.key, this.pedido});
 
   @override
   State<PedidosNovoScreen> createState() => _PedidosNovoScreenState();
 }
 
 class _PedidosNovoScreenState extends State<PedidosNovoScreen> {
+  final Databasepadrao banco = Databasepadrao.instance;
   AppWidgets appWidgets = AppWidgets();
   AppStyles appStyles = AppStyles();
   Map cliente = {'NOMECLI': null, 'CPF': null, 'TELEFONE': ''};
   List<Map<String, dynamic>> listaProdutos = [];
+  late Future<void> future;
+
+  Future<void> initScreen() async {
+    if (widget.pedido != null) {
+      cliente['NOMECLI'] = widget.pedido!['NOMECLI'] ?? '';
+      cliente['CPF'] = widget.pedido!['CLI_CPF'] ?? '';
+      cliente['TELEFONE'] = widget.pedido!['TELEFONE'] ?? '';
+      listaProdutos =
+          await banco.listarPedidosProdutos(widget.pedido!['IDPEDIDO'].toInt()) as List<Map<String, dynamic>>;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    future = initScreen();
+    print(jsonEncode(widget.pedido));
+  }
 
   // Método para calcular o valor total
   double getValorTotal() {
@@ -245,233 +268,262 @@ class _PedidosNovoScreenState extends State<PedidosNovoScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Novo Pedido'),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(60),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: InkWell(
-                onTap: () async {
-                  var retorno = await push(context, ClientesListaScreen(isFromPedido: true));
-                  if (retorno != null) {
-                    setState(() {
-                      cliente = retorno;
-                    });
-                  }
-                },
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            'Razão Social: ${cliente['NOMECLI'] ?? 'Clique para adicionar cliente'}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'CPF: ${cliente['CPF'] ?? 'Clique para adicionar cliente'}',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.white,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    const Icon(Icons.search, color: Colors.white),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        body: Column(
-          children: [
-            Container(
-              height: 50,
-              width: double.infinity,
-              color: Colors.grey.shade300,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text(
-                        'Valor Total: R\$ ${getValorTotal().toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Qtde Itens: ${getQuantidadeTotal()}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+      child: FutureBuilder(
+          future: future,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Scaffold(
+                appBar: AppBar(title: const Text('Novo Pedido')),
+                body: SafeArea(
+                  child: const Center(
+                    child: CircularProgressIndicator(),
                   ),
-                ],
-              ),
-            ),
-            if (listaProdutos.isNotEmpty)
-              Expanded(
-                child: ListView.separated(
-                  separatorBuilder: (BuildContext context, int index) => const Divider(),
-                  itemCount: listaProdutos.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    var item = listaProdutos[index];
-                    return ListTile(
-                      onTap: () => _openProductDetails(context, index),
-                      title: Text(
-                        item['NOMEPROD'],
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+              );
+            }
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('Novo Pedido'),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(60),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: InkWell(
+                      onTap: () async {
+                        var retorno = await push(context, ClientesListaScreen(isFromPedido: true));
+                        if (retorno != null) {
+                          setState(() {
+                            cliente = retorno;
+                          });
+                        }
+                      },
+                      child: Row(
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Código: ${item['CODIGO']}"),
-                              Text("Quantidade: ${item['QUANTIDADE']}"),
-                            ],
-                          ),
-                          Text(
-                            "R\$ ${item['VALOR_TOTAL'].toStringAsFixed(2)}",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: appStyles.primaryColor,
-                              fontSize: 18,
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  'Razão Social: ${cliente['NOMECLI'] ?? 'Clique para adicionar cliente'}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  'CPF: ${cliente['CPF'] ?? 'Clique para adicionar cliente'}',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.white,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
                           ),
+                          const SizedBox(width: 10),
+                          const Icon(Icons.search, color: Colors.white),
                         ],
                       ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => excluirProduto(index),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            if (listaProdutos.isEmpty)
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.add_shopping_cart, size: 60, color: Colors.grey),
-                    Text(
-                      "Nenhum produto\n adicionado",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 30,
-                        color: Colors.grey,
-                      ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-          ],
-        ),
-        floatingActionButton: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FloatingActionButton.extended(
-              heroTag: "btnProduto",
-              label: const Text("Adicionar Produto"),
-              onPressed: cliente['NOMECLI'] == null && listaProdutos.isEmpty
-                  ? () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Row(
-                            children: [
-                              Icon(
-                                Icons.warning,
-                                color: Colors.yellow,
-                                size: 60,
+              body: Column(
+                children: [
+                  Container(
+                    height: 50,
+                    width: double.infinity,
+                    color: Colors.grey.shade300,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text(
+                              'Valor Total: R\$ ${getValorTotal().toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
-                              const SizedBox(width: 10),
-                              Text("Selecione um cliente"),
-                            ],
-                          ),
-                          content: Text("Selecione um cliente antes de adicionar produtos."),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: Text("OK"),
+                            ),
+                            Text(
+                              'Qtde Itens: ${getQuantidadeTotal()}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
-                      );
-                    }
-                  : () async {
-                      var retorno = await push(context, ProdutosListaScreen(isFromPedido: true));
-                      if (retorno == null) return;
-                      adicionarOuAtualizarProduto(retorno);
-                    },
-            ),
-            const SizedBox(height: 15),
-            FloatingActionButton.extended(
-              heroTag: "btnSalvar",
-              label: const Text("Fechar Pedido"),
-              onPressed: cliente['NOMECLI'] == null && listaProdutos.isEmpty
-                  ? null
-                  : () async {
-                      if (cliente['NOMECLI'].isEmpty || listaProdutos.isEmpty) {
-                        await showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Row(
+                      ],
+                    ),
+                  ),
+                  if (listaProdutos.isNotEmpty)
+                    Expanded(
+                      child: ListView.separated(
+                        separatorBuilder: (BuildContext context, int index) => const Divider(),
+                        itemCount: listaProdutos.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          var item = listaProdutos[index];
+                          return ListTile(
+                            onTap: () => _openProductDetails(context, index),
+                            title: Text(
+                              item['NOMEPROD'],
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Icon(
-                                  Icons.warning,
-                                  color: Colors.yellow,
-                                  size: 60,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("Código: ${item['CODIGO']}"),
+                                    Text("Quantidade: ${item['QUANTIDADE']}"),
+                                  ],
                                 ),
-                                const SizedBox(width: 10),
-                                Text("Atenção!"),
+                                Text(
+                                  "R\$ ${item['VALOR_TOTAL'].toStringAsFixed(2)}",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: appStyles.primaryColor,
+                                    fontSize: 18,
+                                  ),
+                                ),
                               ],
                             ),
-                            content: Text("Selecione um cliente e adicione produtos antes de fechar o pedido."),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, false);
-                                },
-                                child: Text("OK"),
-                              ),
-                            ],
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => excluirProduto(index),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  if (listaProdutos.isEmpty)
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.add_shopping_cart, size: 60, color: Colors.grey),
+                          Text(
+                            "Nenhum produto\n adicionado",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30,
+                              color: Colors.grey,
+                            ),
                           ),
-                        );
-                        return;
-                      }
-                      // Lógica para salvar o pedido
-                      push(context, PedidosFecharScreen(cliente: cliente, listaProdutos: listaProdutos));
-                    },
-              backgroundColor:
-                  cliente['NOMECLI'] == null && listaProdutos.isEmpty ? Colors.grey : appStyles.primaryColor,
-            ),
-          ],
-        ),
-      ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+              floatingActionButton: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FloatingActionButton.extended(
+                    heroTag: "btnProduto",
+                    label: const Text("Adicionar Produto"),
+                    icon: const Icon(Icons.add),
+                    onPressed: cliente['NOMECLI'] == null && listaProdutos.isEmpty
+                        ? () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.warning,
+                                      color: Colors.yellow,
+                                      size: 60,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text("Selecione um cliente"),
+                                  ],
+                                ),
+                                content: Text("Selecione um cliente antes de adicionar produtos."),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text("OK"),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        : () async {
+                            var retorno = await push(
+                              context,
+                              ProdutosListaScreen(
+                                isFromPedido: true,
+                              ),
+                            );
+                            if (retorno == null) return;
+                            print(jsonEncode(retorno));
+                            adicionarOuAtualizarProduto(retorno);
+                          },
+                  ),
+                  const SizedBox(height: 15),
+                  FloatingActionButton.extended(
+                    heroTag: "btnSalvar",
+                    label: const Text("Fechar Pedido"),
+                    icon: const Icon(Icons.save),
+                    onPressed: cliente['NOMECLI'] == null && listaProdutos.isEmpty
+                        ? null
+                        : () async {
+                            if (cliente['NOMECLI'].isEmpty || listaProdutos.isEmpty) {
+                              await showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.warning,
+                                        color: Colors.yellow,
+                                        size: 60,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text("Atenção!"),
+                                    ],
+                                  ),
+                                  content: Text("Selecione um cliente e adicione produtos antes de fechar o pedido."),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context, false);
+                                      },
+                                      child: Text("OK"),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              return;
+                            }
+                            // Lógica para salvar o pedido
+                            push(
+                              context,
+                              PedidosFecharScreen(
+                                cliente: cliente,
+                                listaProdutos: listaProdutos,
+                                oldPedido: widget.pedido,
+                              ),
+                            );
+                          },
+                    backgroundColor:
+                        cliente['NOMECLI'] == null && listaProdutos.isEmpty ? Colors.grey : appStyles.primaryColor,
+                  ),
+                ],
+              ),
+            );
+          }),
     );
   }
 }

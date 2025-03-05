@@ -1,7 +1,6 @@
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:connect_force_app/app/common/styles/app_styles.dart';
 import 'package:connect_force_app/app/common/utils/functions.dart';
 import 'package:connect_force_app/app/common/widgets/elevated_button_widget.dart';
@@ -107,21 +106,23 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
     var viewUser = await dataProvider.datasResponse(
       context,
       route: 'ClienteDetalhe?Codigo=${widget.cliente!['CODIGO'].toString()}',
+      showMessage: false,
     );
 
     if (viewUser.isNotEmpty) {
-      var listViw = List.from(viewUser[0] as List);
-      usuarioView = listViw[0];
-      _codigoController.text = usuarioView!['CODCLI'].toString();
-      _ultVendController.text = usuarioView!['ULTVEND'].toString();
-      _dataCadastroController.text = usuarioView!['DATCAD'].toString();
-      _limiteCreditoController.text = usuarioView!['LIMITETOTAL'].toString();
-      _dividaTotalController.text = usuarioView!['DIVIDATOTAL'] ?? '0.0';
-      _limiteDisponivelController.text = usuarioView!['LIMITEDISPONIVEL'].toString();
-      _latitudeController.text = usuarioView!['LATITUDE'].toString();
-      _longitudeController.text = usuarioView!['LONGITUDE'].toString();
+      var listView = List.from(viewUser[0] as List);
+      usuarioView = listView[0];
+      _codigoController.text = usuarioView!['CODCLI']?.toString() ?? '';
+      _ultVendController.text = usuarioView!['ULTVEND']?.toString() ?? '';
+      _dataCadastroController.text = usuarioView!['DATCAD']?.toString() ?? '';
+      _limiteCreditoController.text = usuarioView!['LIMITETOTAL']?.toString() ?? '';
+      _dividaTotalController.text = usuarioView!['DIVIDATOTAL']?.toString() ?? '';
+      _limiteDisponivelController.text = usuarioView!['LIMITEDISPONIVEL']?.toString() ?? '';
+      _latitudeController.text = usuarioView!['LATITUDE']?.toString() ?? '';
+      _longitudeController.text = usuarioView!['LONGITUDE']?.toString() ?? '';
       // setorCadastroController.text = usuarioView!['SETOR'];
     }
+
     isEditing = widget.cliente != null;
 
     if (isEditing) {
@@ -217,6 +218,7 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
       "IDUSUARIO": usuario['IDUSUARIO'],
       "NOMECLI": _nomeController.text,
       "CODCLI": _codigoController.text,
+      "CODIGO": usuarioView != null ? -1 : null,
       "ENDERECO": _enderecoController.text,
       "BAIRRO": _bairroController.text,
       "CIDADE": _cidadeController.text,
@@ -275,6 +277,27 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
     }
   }
 
+  bool _isFieldEditable(String fieldName) {
+    // Se o cliente for null, todos os campos são editáveis
+    if (widget.cliente == null) return true;
+
+    // Lista de campos que devem ser editáveis mesmo quando o cliente não é null
+    final editableFields = [
+      'endereco',
+      'bairro',
+      'cidade',
+      'estado',
+      'cep',
+      'numeroLogradouro',
+      'complementoLogradouro',
+      'limiteCredito',
+      'diaVencimento',
+    ];
+
+    // Verifica se o campo está na lista de campos editáveis
+    return editableFields.contains(fieldName);
+  }
+
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -283,10 +306,11 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
     Function(String)? onChanged,
     TextInputType? keyboardType = TextInputType.text,
     List<TextInputFormatter>? inputFormatters,
+    String fieldName = '', // Adicionamos o parâmetro fieldName
   }) {
     return TextFormField(
       controller: controller,
-      readOnly: isEditing,
+      readOnly: !_isFieldEditable(fieldName), // Aplicamos a lógica de readOnly aqui
       decoration: InputDecoration(labelText: label),
       validator: isRequired
           ? (value) {
@@ -302,62 +326,6 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
       onChanged: onChanged,
       inputFormatters: inputFormatters ?? [],
       keyboardType: keyboardType,
-    );
-  }
-
-  Widget _buildTextFieldDate({
-    required String label,
-    required TextEditingController controller,
-    bool isRequired = false,
-    String? Function(String?)? customValidator,
-    Function(String)? onChanged,
-  }) {
-    return TextFormField(
-      controller: controller,
-      readOnly: isEditing,
-      decoration: InputDecoration(labelText: label),
-      validator: isRequired
-          ? (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Campo obrigatório';
-              }
-              if (customValidator != null) {
-                return customValidator(value);
-              }
-              return null;
-            }
-          : customValidator,
-      onChanged: onChanged,
-      onTap: () => showDatePicker(
-        builder: (context, child) {
-          return Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: ColorScheme.light(
-                primary: appStyles.primaryColor, // header background color
-                onPrimary: Colors.white, // header text color
-                onSurface: appStyles.primaryColor, // body text color
-              ),
-              textButtonTheme: TextButtonThemeData(
-                style: TextButton.styleFrom(
-                  foregroundColor: appStyles.primaryColor, // button text color
-                ),
-              ),
-            ),
-            child: child!,
-          );
-        },
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2000),
-        lastDate: DateTime(3999),
-      ).then(
-        (DateTime? value) {
-          if (value != null) {
-            final String date = DateFormat('dd/MM/yyyy').format(value);
-            controller.text = date;
-          }
-        },
-      ),
     );
   }
 
@@ -434,9 +402,14 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
                         ),
                         _buildTextField(label: 'Profissão', controller: _profissaoController),
                         _buildTextField(
-                            label: 'Dia Vencimento',
-                            controller: _diaVencimentoController,
-                            keyboardType: TextInputType.number),
+                          label: 'Dia Vencimento',
+                          controller: _diaVencimentoController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          fieldName: 'diaVencimento',
+                        ),
                         _buildTextField(
                           label: 'Limite de Crédito',
                           controller: _limiteCreditoController,
@@ -445,6 +418,7 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
                             FilteringTextInputFormatter.digitsOnly,
                             CentavosInputFormatter(casasDecimais: 2),
                           ],
+                          fieldName: 'limiteCredito',
                         ),
 
                         if (usuarioView != null) ...[
@@ -457,13 +431,11 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
                           children: [
                             Checkbox(
                               value: naoVender,
-                              onChanged: isEditing
-                                  ? null
-                                  : (value) {
-                                      setState(() {
-                                        naoVender = value ?? false;
-                                      });
-                                    },
+                              onChanged: (value) {
+                                setState(() {
+                                  naoVender = value ?? false;
+                                });
+                              },
                             ),
                             const Text('Não Vender'),
                           ],
@@ -538,17 +510,42 @@ class _ClientesCadastroScreenState extends State<ClientesCadastroScreen> with Si
                           CepInputFormatter(),
                         ],
                       ),
-                      _buildTextField(label: 'Endereço', controller: _enderecoController, isRequired: true),
+                      _buildTextField(
+                        label: 'Endereço',
+                        controller: _enderecoController,
+                        isRequired: true,
+                        fieldName: 'endereco',
+                      ),
                       _buildTextField(
                         label: 'Número Logradouro',
                         controller: _numeroLogradouroController,
                         isRequired: true,
                         keyboardType: TextInputType.numberWithOptions(decimal: false),
+                        fieldName: 'numeroLogradouro',
                       ),
-                      _buildTextField(label: 'Complemento Logradouro', controller: _complementoLogradouroController),
-                      _buildTextField(label: 'Bairro', controller: _bairroController, isRequired: true),
-                      _buildTextField(label: 'Cidade', controller: _cidadeController, isRequired: true),
-                      _buildTextField(label: 'Estado', controller: _estadoController, isRequired: true),
+                      _buildTextField(
+                        label: 'Complemento Logradouro',
+                        controller: _complementoLogradouroController,
+                        fieldName: 'complementoLogradouro',
+                      ),
+                      _buildTextField(
+                        label: 'Bairro',
+                        controller: _bairroController,
+                        isRequired: true,
+                        fieldName: 'bairro',
+                      ),
+                      _buildTextField(
+                        label: 'Cidade',
+                        controller: _cidadeController,
+                        isRequired: true,
+                        fieldName: 'cidade',
+                      ),
+                      _buildTextField(
+                        label: 'Estado',
+                        controller: _estadoController,
+                        isRequired: true,
+                        fieldName: 'estado',
+                      ),
                     ],
                   ),
                 ),

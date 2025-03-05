@@ -1,11 +1,11 @@
-import 'package:connect_force_app/app/layers/presenter/logged_in/screens/pedidos/pedidos_impressao_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:connect_force_app/app/common/styles/app_styles.dart';
 import 'package:connect_force_app/app/common/utils/functions.dart';
 import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/screens/pedidos/pedidos_impressao_screen.dart';
 import 'package:connect_force_app/app/layers/presenter/logged_in/screens/pedidos/pedidos_novo_screen.dart';
 import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
 import 'package:connect_force_app/navigation.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class PedidosListaScreen extends StatefulWidget {
@@ -99,13 +99,14 @@ class _PedidosListaScreenState extends State<PedidosListaScreen> {
               Text("ID Pedido: ${pedido['IDPEDIDO']}"),
               Text("Tipo: ${pedido['TIPO']}"),
               Text("Data: ${formatDate(pedido['DATAHORA'])}"),
-              if (pedido['TIPOPEDIDO'] == 'C') ...[
+              if (pedido['TIPOPEDIDO'] == 'C' || pedido['DATAMOBILE'] == null) ...[
                 const SizedBox(height: 20),
                 Center(
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       // Função para impressão
                       Navigator.pop(context);
+                      await push(context, PedidosNovoScreen(pedido: pedido));
                     },
                     style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
                     child: const Text("Editar"),
@@ -118,7 +119,7 @@ class _PedidosListaScreenState extends State<PedidosListaScreen> {
                   onPressed: () {
                     // Função para impressão
                     Navigator.pop(context);
-                    push(context, PedidosImpressaoScreen(pedido: pedido));
+                    push(context, PedidosImpressaoScreen(idPedido: pedido['IDPEDIDO'].toInt()));
                   },
                   style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
                   child: const Text("Imprimir"),
@@ -292,7 +293,7 @@ class _PedidosListaScreenState extends State<PedidosListaScreen> {
                                 borderRadius: BorderRadius.circular(5),
                                 color: pedido['DATAMOBILE'] == null ? Colors.red : Colors.green,
                               ),
-                              padding: const EdgeInsets.all(5),
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                               margin: const EdgeInsets.only(top: 5),
                               child: Text(
                                 pedido['DATAMOBILE'] == null ? 'Não sincronizado' : 'Sincronizado',
@@ -319,9 +320,10 @@ class _PedidosListaScreenState extends State<PedidosListaScreen> {
         floatingActionButton: FloatingActionButton.extended(
           label: const Text("Novo Pedido"),
           onPressed: () async {
-            await push(context, const PedidosNovoScreen());
+            await push(context, PedidosNovoScreen());
             future = initScreen();
           },
+          icon: const Icon(Icons.add),
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:connect_force_app/app/common/services/network_status_service.dart';
 import 'package:connect_force_app/app/common/styles/app_styles.dart';
 import 'package:connect_force_app/app/common/widgets/app_widgets.dart';
@@ -8,10 +9,10 @@ import 'package:connect_force_app/app/layers/presenter/not_logged_in/login_scree
 import 'package:connect_force_app/app/layers/presenter/providers/auth_provider.dart';
 import 'package:connect_force_app/app/layers/presenter/providers/config_provider.dart';
 import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
-import 'package:flutter/material.dart';
 import 'package:connect_force_app/app/layers/presenter/providers/user_provider.dart';
 import 'package:connect_force_app/functions.dart';
 import 'package:connect_force_app/navigation.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
@@ -307,12 +308,15 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            Text(
-                              _vendasText,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                            SizedBox(
+                              width: ((MediaQuery.of(context).size.width - 140) / 2),
+                              child: Text(
+                                _vendasText,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                             Container(
@@ -355,8 +359,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       : isLocationEnabled!
                           ? "Localização ativada ✅"
                           : "Localização desativada ❌",
-                  style: TextStyle(fontSize: 18),
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
+                SizedBox(height: 5),
               ],
             ),
           ),
@@ -385,7 +390,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   // Atualiza o estado e limpa os campos se necessário
   void _updateLocationStatus(bool isEnabled) {
     setState(() => isLocationEnabled = isEnabled);
-    _showSnackBar(isEnabled);
 
     if (!isEnabled) {
       dataProvider.latitudeController.text = '';
@@ -396,18 +400,5 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       dataProvider.startListeningToLocationChanges(context);
     }
     setState(() {});
-  }
-
-  // Exibe a mensagem via SnackBar
-  void _showSnackBar(bool isEnabled) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          isEnabled ? "Localização ativada ✅" : "Localização desativada ❌!",
-        ),
-        duration: Duration(seconds: 2),
-        backgroundColor: isEnabled ? Colors.green : Colors.red,
-      ),
-    );
   }
 }

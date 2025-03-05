@@ -1,24 +1,26 @@
 import 'package:brasil_fields/brasil_fields.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:connect_force_app/app/common/utils/functions.dart';
 import 'package:connect_force_app/app/common/widgets/text_field_date.dart';
 import 'package:connect_force_app/app/common/widgets/text_field_dropdown.dart';
 import 'package:connect_force_app/app/common/widgets/text_field_widget.dart';
 import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
+import 'package:connect_force_app/app/layers/presenter/logged_in/screens/pedidos/pedidos_impressao_screen.dart';
 import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
+import 'package:connect_force_app/navigation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class PedidosFecharScreen extends StatefulWidget {
   final Map cliente;
   final List listaProdutos;
-  final bool? isEdit;
+  final Map? oldPedido;
   const PedidosFecharScreen({
     super.key,
     required this.cliente,
     required this.listaProdutos,
-    this.isEdit = false,
+    this.oldPedido,
   });
 
   @override
@@ -55,23 +57,20 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
     };
   });
 
-  // Métodos para cálculos
-  double getValorTotal() {
-    return widget.listaProdutos.fold(0, (sum, item) => sum + (item['VALOR_TOTAL'] ?? 0));
-  }
-
-  int getQuantidadeTotal() {
-    return widget.listaProdutos.fold(0, (sum, item) {
-      final quantidade = item['QUANTIDADE'];
-      return sum + (quantidade is int ? quantidade : 0);
-    });
-  }
-
-  double getValorComDescontoEentrada() {
-    double valorTotal = getValorTotal();
-    double desconto = double.tryParse(descontoContoller.text) ?? 0;
-    double entrada = double.tryParse(valorEntradaContoller.text) ?? 0;
-    return valorTotal - desconto - entrada;
+  Future<void> preecherVariaveis() async {
+    if (widget.oldPedido != null) {
+      inicioVencimentoContoller.text = widget.oldPedido!['INICIO_VENCIMENTO'] ??
+          DateFormat('dd/MM/yyyy').format(DateTime.now().add(Duration(days: 30)));
+      descontoContoller.text = widget.oldPedido!['DESCONTO'].toString();
+      valorEntradaContoller.text = widget.oldPedido!['VALORENTRADA'].toString();
+      observacaoContoller.text = widget.oldPedido!['OBSPEDIDO'] ?? '';
+      selectedTipoPedido = tipoPedido.firstWhere(
+        (element) => element['id'] == (widget.oldPedido!['TIPO_PEDIDO'] == 'P' ? 2 : 1),
+      );
+      // selectedNumeroParcela = numeroParcela.firstWhere(
+      //   (element) => element['id'] == widget.oldPedido!['PRAZOPAGTO'].toInt(),
+      // );
+    }
   }
 
   // Método para gerar as parcelas
@@ -96,6 +95,29 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
     setState(() {});
   }
 
+  // Métodos para cálculos
+  double getValorTotal() {
+    return widget.listaProdutos.fold(0, (sum, item) => sum + (item['VALOR_TOTAL'] ?? 0));
+  }
+
+  int getQuantidadeTotal() {
+    return widget.listaProdutos.fold(0, (sum, item) {
+      final quantidade = item['QUANTIDADE'];
+      return sum + (quantidade is int ? quantidade : 0);
+    });
+  }
+
+  String getValorSemVirgula(String valor) {
+    return valor.replaceAll('.', '').replaceAll(',', '.');
+  }
+
+  double getValorComDescontoEentrada() {
+    double valorTotal = getValorTotal();
+    double desconto = double.tryParse(getValorSemVirgula(descontoContoller.text)) ?? 0;
+    double entrada = double.tryParse(getValorSemVirgula(valorEntradaContoller.text)) ?? 0;
+    return valorTotal - desconto - entrada;
+  }
+
   // Método para formatar o valor com duas casas decimais
   void formatarValor(TextEditingController controller) {
     String text = controller.text.replaceAll(RegExp(r'[^0-9]'), '');
@@ -112,22 +134,10 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
   Future<void> fecharPedido() async {
     try {
       // Verifica se está editando um pedido existente
-      // if (widget.isEdit!) {
-      //   await banco.delete(
-      //     'MOBILE_ITEMPEDIDO',
-      //     where: 'IDPEDIDO = ?',
-      //     whereArgs: [
-      //       // TArquivo.lerINI('Pedidos', 'IdPedido'),
-      //     ],
-      //   );
-      //   await banco.delete(
-      //     'MOBILE_PEDIDO',
-      //     where: 'IDPEDIDO = ?',
-      //     whereArgs: [
-      //       // TArquivo.lerINI('Pedidos', 'IdPedido'),
-      //     ],
-      //   );
-      // }
+      if (widget.oldPedido != null) {
+        await banco.deleteId('MOBILE_ITEMPEDIDO', 'IDPEDIDO', widget.oldPedido!['IDPEDIDO'].toString());
+        await banco.deleteId('MOBILE_PEDIDO', 'IDPEDIDO', widget.oldPedido!['IDPEDIDO'].toString());
+      }
 
       // Verifica se o cliente é novo
       final clienteNovo = await banco.cliente(widget.cliente['CODCLI'].toString());
@@ -139,39 +149,49 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
       final idPedido = await banco.dataInsertClient(
         'MOBILE_PEDIDO',
         {
+          // 'IDPEDIDO': '', // Novo campo
+          'IDPEDIDOERP': '0', // Já existia
           'IDEMPRESA': usuario['CODEMPRESA'],
           'IDUSUARIO': usuario['CODIGO'],
-          'IDCLIENTE': widget.cliente['CODCLI'],
+          'IDCLIENTE': widget.cliente['CODCLI'].toString().padLeft(8, '0'),
           'PRAZOPAGTO': selectedNumeroParcela['id'].toString(),
+          // 'DATAMOBILE': DateFormat('yyyy-MM-dd').format(DateTime.now()), // Novo campo
           'INICIO_VENCIMENTO': DateFormat('yyyy-MM-dd').format(formatarData(inicioVencimentoContoller.text)),
-          'VALOR': double.tryParse(descontoContoller.text) ?? 0,
-          'DESCONTO': double.tryParse(descontoContoller.text) ?? 0,
-          'VALORTOTAL': getValorComDescontoEentrada(),
-          'VALORENTRADA': double.tryParse(valorEntradaContoller.text) ?? 0,
-          'CLI_NOME': widget.cliente['NOMECLI'],
-          'DATAHORA': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()), // Formata a data atual
-          'COUNT_ITEMPEDIDO': widget.listaProdutos.length,
           'OBSPEDIDO': observacaoContoller.text.isNotEmpty ? observacaoContoller.text : ' ',
+          'VALOR': double.tryParse(getValorSemVirgula(descontoContoller.text)) ?? 0,
+          'DESCONTO': double.tryParse(getValorSemVirgula(descontoContoller.text)) ?? 0,
+          'VALORTOTAL': getValorComDescontoEentrada(),
+          'VALORENTRADA': double.tryParse(getValorSemVirgula(valorEntradaContoller.text)) ?? 0,
+          'STATUSPEDIDOERP': '0', // Novo campo
+          'CLI_NOME': widget.cliente['NOMECLI'],
+          'CLI_CPF': widget.cliente['CPF'],
+          'DATAHORA': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()), // Formata a data atual
           'CLIENTENOVO': isClienteNovo,
+          'COUNT_ITEMPEDIDO': widget.listaProdutos.length,
           'TIPOPEDIDO': selectedTipoPedido['id'] == 1 ? 'P' : 'C',
-          'LATITUDE': dataProvider.latitudeController.text,
-          'LONGITUDE': dataProvider.longitudeController.text,
+          'LATITUDE': dataProvider.latitudeController.text.isEmpty ? '0' : dataProvider.latitudeController.text,
+          'LONGITUDE': dataProvider.longitudeController.text.isEmpty ? '0' : dataProvider.longitudeController.text,
         },
       );
 
       // Insere os itens do pedido na tabela MOBILE_ITEMPEDIDO
       for (var produto in widget.listaProdutos) {
-        await banco.dataInsert('MOBILE_ITEMPEDIDO', [
-          {
-            'IDUSUARIO': usuario['CODIGO'],
-            'IDITEMPEDIDOERP': produto['IDITEMPEDIDOERP'],
-            'IDPEDIDO': idPedido,
-            'IDPRODUTO': produto['IDPRODUTO'],
-            'QTDE': produto['QUANTIDADE'],
-            'VALORUNITARIO': produto['VALORUNITARIO'],
-            'VALORTOTAL': produto['VALOR_TOTAL'],
-          }
-        ]);
+        await banco.dataInsertLista(
+          'MOBILE_ITEMPEDIDO',
+          [
+            {
+              // 'IDITEMPEDIDO': '', // Novo campo
+              'IDUSUARIO': usuario['CODIGO'],
+              'IDITEMPEDIDOERP': '0',
+              'IDPEDIDO': idPedido,
+              'IDPRODUTO': produto['CODPROD'],
+              'QTDE': produto['QUANTIDADE'],
+              'VALORUNITARIO': produto['PRECO'],
+              'VALORTOTAL': produto['VALOR_TOTAL'],
+              // 'DATAHORAMOBILE': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+            }
+          ],
+        );
       }
 
       // Limpa os campos após fechar o pedido
@@ -188,10 +208,9 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  // Navegar para a tela de impressão
-                  // Navigator.of(context).push(MaterialPageRoute(
-                  //   builder: (context) => TelaImpressao(),
-                  // ));
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                  push(context, PedidosImpressaoScreen(idPedido: idPedido));
                 },
                 child: Text('Sim'),
               ),
@@ -246,6 +265,7 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
   Future<void> initScreen() async {
     dataProvider = Provider.of<DataProvider>(context, listen: false);
     usuario = await dataProvider.loadDataToSend(uri: 'login');
+    await preecherVariaveis();
     gerarParcelas();
     setState(() {});
   }
@@ -330,6 +350,7 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
                           FilteringTextInputFormatter.digitsOnly,
                           CentavosInputFormatter(casasDecimais: 2),
                         ],
+                        onChanged: (value) => gerarParcelas(),
                       ),
                     ),
                     const SizedBox(width: 5),
@@ -342,6 +363,7 @@ class _PedidosFecharScreenState extends State<PedidosFecharScreen> {
                           FilteringTextInputFormatter.digitsOnly,
                           CentavosInputFormatter(casasDecimais: 2),
                         ],
+                        onChanged: (value) => gerarParcelas(),
                       ),
                     ),
                   ],

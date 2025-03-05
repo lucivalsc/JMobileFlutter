@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:geolocator/geolocator.dart';
+
 import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
 import 'package:connect_force_app/app/layers/domain/usecases/data/datas_usecase.dart';
 import 'package:connect_force_app/app/layers/domain/usecases/data/synchronous_usecase.dart';
@@ -14,6 +14,8 @@ import 'package:connect_force_app/app/layers/presenter/providers/config_provider
 import 'package:connect_force_app/app/layers/presenter/providers/user_provider.dart';
 import 'package:connect_force_app/navigation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 
 class DataProvider extends ChangeNotifier {
   final DatasUsecase _datasUsecase;
@@ -60,12 +62,13 @@ class DataProvider extends ChangeNotifier {
   final TextEditingController longitudeController = TextEditingController();
   // Adicione um StreamSubscription para monitorar a localização
   StreamSubscription<Position>? positionStreamSubscription;
+
   Future<void> getCurrentLocation(BuildContext context) async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('O serviço de localização está desativado.')),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('O serviço de localização está desativado.')),
+      // );
       return;
     }
     LocationPermission permission = await Geolocator.checkPermission();
@@ -111,9 +114,9 @@ class DataProvider extends ChangeNotifier {
     // Detecta quando o serviço de localização é desativado
     Geolocator.getServiceStatusStream().listen((ServiceStatus status) {
       if (status == ServiceStatus.disabled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('O serviço de localização foi desativado.')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text('O serviço de localização foi desativado.')),
+        // );
       }
     });
   }
@@ -216,6 +219,7 @@ class DataProvider extends ChangeNotifier {
     String method = 'GET',
     String route = '',
     Map<String, dynamic>? payLoad,
+    bool showMessage = true,
   }) async {
     final result = await _datasUsecase([
       method,
@@ -224,14 +228,17 @@ class DataProvider extends ChangeNotifier {
     ]);
     return result.fold(
       (l) async {
-        await push(
-          context,
-          FailureScreen(
-            failureType: l.failureType,
-            title: l.title,
-            message: l.message,
-          ),
-        );
+        if (showMessage) {
+          await push(
+            context,
+            FailureScreen(
+              failureType: l.failureType,
+              title: l.title,
+              message: l.message,
+            ),
+          );
+        }
+
         return [];
       },
       (r) => r,
@@ -253,8 +260,22 @@ class DataProvider extends ChangeNotifier {
         return false; // Nenhum dado para enviar
       }
 
+      // Convertendo todos os valores para String e substituindo strings vazias por ' '
+      dados = dados.map((item) {
+        return item.map((key, value) {
+          String newValue = (value?.toString() ?? '').isEmpty ? ' ' : value.toString();
+          if (key == 'DATAHORAMOBILE') {
+            return MapEntry(key, DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()));
+          } else if (key == 'DATAMOBILE') {
+            return MapEntry(key, DateFormat('yyyy-MM-dd').format(DateTime.now()));
+          }
+          return MapEntry(key, newValue);
+        });
+      }).toList();
+
       // Envia os dados via evento
       for (var element in dados) {
+        print(jsonEncode(element));
         var dbmPost = jsonEncode(
           {
             "entity": tabela,

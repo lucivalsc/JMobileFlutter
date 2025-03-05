@@ -1,10 +1,13 @@
-import 'package:connect_force_app/app/common/utils/functions.dart';
-import 'package:flutter/material.dart';
+import 'package:connect_force_app/app/common/qrcode/qr_code_view.dart';
 import 'package:connect_force_app/app/common/styles/app_styles.dart';
+import 'package:connect_force_app/app/common/utils/functions.dart';
 import 'package:connect_force_app/app/common/widgets/app_widgets.dart';
 import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
 import 'package:connect_force_app/app/layers/data/models/debouncer_model.dart';
 import 'package:connect_force_app/app/layers/presenter/logged_in/screens/produtos/produtos_visualizar_screen.dart';
+import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ProdutosListaScreen extends StatefulWidget {
   final bool? isFromPedido;
@@ -16,6 +19,7 @@ class ProdutosListaScreen extends StatefulWidget {
 
 class ProdutosListaScreenState extends State<ProdutosListaScreen> {
   Databasepadrao banco = Databasepadrao.instance;
+  late DataProvider dataProvider;
   Debouncer debouncer = Debouncer(milliseconds: 500);
   AppWidgets appWidgets = AppWidgets();
   AppStyles appStyles = AppStyles();
@@ -25,6 +29,7 @@ class ProdutosListaScreenState extends State<ProdutosListaScreen> {
   TextEditingController searchController = TextEditingController();
 
   Future<void> initScreen() async {
+    dataProvider = Provider.of<DataProvider>(context, listen: false);
     listaProdutos = await banco.dataReturn("produtos");
     print(listaProdutos.first);
     setState(() {
@@ -218,15 +223,33 @@ class ProdutosListaScreenState extends State<ProdutosListaScreen> {
                       borderSide: BorderSide.none,
                     ),
                     prefixIcon: const Icon(Icons.search, color: Colors.black),
-                    suffixIcon: searchController.text.isNotEmpty
-                        ? IconButton(
+                    suffixIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (searchController.text.isNotEmpty)
+                          IconButton(
                             icon: const Icon(Icons.clear, color: Colors.black),
                             onPressed: () {
                               searchController.clear();
                               filterProdutos('');
                             },
-                          )
-                        : null,
+                          ),
+                        IconButton(
+                          icon: const Icon(Icons.qr_code, color: Colors.black),
+                          onPressed: () async {
+                            searchController.clear();
+                            var scannedResult = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => QrCodeView(),
+                              ),
+                            );
+
+                            searchController.text = scannedResult as String;
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -271,6 +294,7 @@ class ProdutosListaScreenState extends State<ProdutosListaScreen> {
                                 ),
                                 onPressed: () {
                                   Navigator.of(context).pop();
+
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(

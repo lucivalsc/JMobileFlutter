@@ -10,7 +10,7 @@ class LoadingScreen extends StatelessWidget {
       backgroundColor: Colors.black.withOpacity(.7),
       body: Center(
         child: Lottie.asset(
-          'lib/app/common/assets/lottie/loading.json',
+          'lib/app/common/assets/lottie/loading2.json',
           height: MediaQuery.of(context).size.width / 2,
         ),
         // CircularProgressIndicator(),

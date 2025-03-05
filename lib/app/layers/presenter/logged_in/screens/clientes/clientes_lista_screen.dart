@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:connect_force_app/app/common/styles/app_styles.dart';
 import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
 import 'package:connect_force_app/app/layers/data/models/debouncer_model.dart';
 import 'package:connect_force_app/app/layers/presenter/logged_in/screens/clientes/clientes_cadastro_screen.dart';
 import 'package:connect_force_app/navigation.dart';
+import 'package:flutter/material.dart';
 
 class ClientesListaScreen extends StatefulWidget {
   final bool? isFromPedido;
@@ -215,6 +215,26 @@ class _ClientesListaScreenState extends State<ClientesListaScreen> {
                               ),
                             ),
                           ],
+                          Row(
+                            children: [
+                              Container(
+                                alignment: Alignment.centerLeft,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: item['ERP'] == '1' ? Colors.amber.shade100 : Colors.grey,
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                                margin: const EdgeInsets.only(top: 5),
+                                child: Text(
+                                  item['ERP'] == '1' ? 'Cliente do App' : 'Cliente do Erp',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: item['ERP'] == '1' ? Colors.black : Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
                         ],
                       ),
                       trailing: const Icon(

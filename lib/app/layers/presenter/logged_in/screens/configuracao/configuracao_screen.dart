@@ -1,11 +1,15 @@
 import 'dart:io';
-import 'package:path/path.dart' as p;
-import 'package:http/http.dart' as http;
+
 import 'package:connect_force_app/app/common/styles/app_styles.dart';
 import 'package:connect_force_app/app/common/widgets/elevated_button_widget.dart';
 import 'package:connect_force_app/app/common/widgets/text_field_widget.dart';
-import 'package:flutter/material.dart';
+import 'package:connect_force_app/app/layers/data/datasources/local/banco_datasource_implementation.dart';
 import 'package:connect_force_app/app/layers/presenter/providers/data_provider.dart';
+import 'package:connect_force_app/loading_overlay.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +24,7 @@ class ConfiguracaoScreen extends StatefulWidget {
 }
 
 class _ConfiguracaoScreenState extends State<ConfiguracaoScreen> {
+  final Databasepadrao banco = Databasepadrao.instance;
   bool isScreenLocked = false;
   late DataProvider dataProvider;
   late Future<void> future;
@@ -63,107 +68,116 @@ class _ConfiguracaoScreenState extends State<ConfiguracaoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return true;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Configuração"),
-        ),
-        body: FutureBuilder(
-          future: future,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Dados de acesso",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+    return LoadingOverlay(
+      isLoading: isScreenLocked,
+      child: WillPopScope(
+        onWillPop: () async {
+          return true;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text("Configuração"),
+          ),
+          body: FutureBuilder(
+            future: future,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Dados de acesso",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    TextFieldWidget(
-                      label: 'Host (IP)',
-                      // icon: Icons.lock,
-                      controller: hostController,
-                    ),
-                    SizedBox(height: 10),
-                    TextFieldWidget(
-                      label: 'Porta',
-                      // icon: Icons.lock,
-                      controller: portController,
-                    ),
-                    SizedBox(height: 10),
-                    TextFieldWidget(
-                      label: 'Usuário',
-                      // icon: Icons.lock,
-                      controller: userLogger,
-                    ),
-                    SizedBox(height: 10),
-                    TextFieldWidget(
-                      label: 'Senha',
-                      // icon: Icons.lock,
-                      controller: passwordLogger,
-                    ),
-                  ],
+                      SizedBox(height: 10),
+                      TextFieldWidget(
+                        label: 'Host (IP)',
+                        // icon: Icons.lock,
+                        controller: hostController,
+                      ),
+                      SizedBox(height: 10),
+                      TextFieldWidget(
+                        label: 'Porta',
+                        // icon: Icons.lock,
+                        controller: portController,
+                      ),
+                      SizedBox(height: 10),
+                      TextFieldWidget(
+                        label: 'Usuário',
+                        // icon: Icons.lock,
+                        controller: userLogger,
+                      ),
+                      SizedBox(height: 10),
+                      TextFieldWidget(
+                        label: 'Senha',
+                        // icon: Icons.lock,
+                        controller: passwordLogger,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ElevatedButtonWidget(
-                label: 'SALVAR CONFIGURAÇÃO',
-                onPressed: () async {
-                  setState(() => isScreenLocked = true);
-                  // Oculta o teclado se estiver ativo
-                  FocusManager.instance.primaryFocus?.unfocus();
-                  await salvarConfiguracao();
-                  Navigator.pop(context);
+              );
+            },
+          ),
+          bottomNavigationBar: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ElevatedButtonWidget(
+                  label: 'SALVAR CONFIGURAÇÃO',
+                  onPressed: () async {
+                    setState(() => isScreenLocked = true);
+                    // Oculta o teclado se estiver ativo
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    await salvarConfiguracao();
+                    Navigator.pop(context);
 
-                  setState(() => isScreenLocked = false);
-                },
-              ),
-              const SizedBox(height: 10),
-              ElevatedButtonWidget(
-                label: 'ENVIAR BANCO',
-                onPressed: () async {
-                  setState(() => isScreenLocked = true);
-                  enviarBancoDados();
-                  setState(() => isScreenLocked = false);
-                },
-              ),
-              const SizedBox(height: 10),
-              ElevatedButtonWidget(
-                label: 'LIMPAR BANCO',
-                onPressed: () async {
-                  // DM.Deletar('CLIENTES');
-                  // DM.Deletar('CONTAS');
-                  // DM.Deletar('MOBILE_CLIENTE');
-                  // DM.Deletar('MOBILE_CONTATOS');
-                  // DM.Deletar('MOBILE_ITEMPEDIDO');
-                  // DM.Deletar('MOBILE_PEDIDO');
-                  // DM.Deletar('PRODUTOS');
-                },
-              ),
-            ],
+                    setState(() => isScreenLocked = false);
+                  },
+                ),
+                if (kDebugMode) ...[
+                  const SizedBox(height: 10),
+                  ElevatedButtonWidget(
+                    label: 'ENVIAR BANCO',
+                    onPressed: () async {
+                      setState(() => isScreenLocked = true);
+                      await enviarBancoDados();
+                      setState(() => isScreenLocked = false);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButtonWidget(
+                    label: 'LIMPAR BANCO',
+                    onPressed: () async {
+                      setState(() => isScreenLocked = true);
+                      try {
+                        await banco.deleteAll('MOBILE_CLIENTE');
+                        await banco.deleteAll('MOBILE_CONTATOS');
+                        await banco.deleteAll('MOBILE_ITEMPEDIDO');
+                        await banco.deleteAll('MOBILE_PEDIDO');
+                        await banco.deleteAll('MOBILE_PARCELAS');
+                        setState(() => isScreenLocked = false);
+                      } catch (e) {
+                        setState(() => isScreenLocked = false);
+                      }
+                    },
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       ),

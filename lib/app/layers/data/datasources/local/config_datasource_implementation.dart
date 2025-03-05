@@ -1,7 +1,8 @@
-import 'package:hive/hive.dart';
 import 'package:connect_force_app/app/common/models/exception_models.dart';
 import 'package:connect_force_app/app/common/utils/cryptography.dart';
 import 'package:connect_force_app/app/layers/data/datasources/local/config_datasource.dart';
+import 'package:hive/hive.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 // import 'package:package_info/package_info.dart';
 
 class ConfigDatasourceImplementation implements IConfigDatasource {
@@ -48,8 +49,7 @@ class ConfigDatasourceImplementation implements IConfigDatasource {
   @override
   Future<String?> loadLastLoggedPassword() async {
     try {
-      final password =
-          await Hive.openBox('configProviderState').then((box) => box.get('lastLoggedPassword'));
+      final password = await Hive.openBox('configProviderState').then((box) => box.get('lastLoggedPassword'));
       if (password != null) {
         return Cryptography.decrypt(password);
       } else {
@@ -64,7 +64,11 @@ class ConfigDatasourceImplementation implements IConfigDatasource {
   Future<void> saveLastLoggedPassword(String address) async {
     try {
       final box = await Hive.openBox('configProviderState');
-      await box.put('lastLoggedPassword', Cryptography.encrypt(address));
+      if (address.isNotEmpty) {
+        await box.put('lastLoggedPassword', Cryptography.encrypt(address));
+      } else {
+        await box.put('lastLoggedPassword', '');
+      }
     } catch (e) {
       throw StorageException(message: e.toString());
     }
@@ -73,9 +77,8 @@ class ConfigDatasourceImplementation implements IConfigDatasource {
   @override
   Future<String> version() async {
     try {
-      // var info = await PackageInfo.fromPlatform();
-      // return '${info.version}.${info.buildNumber}';
-      return '';
+      var info = await PackageInfo.fromPlatform();
+      return '${info.version}.${info.buildNumber}';
     } catch (e) {
       throw StorageException(message: e.toString());
     }
